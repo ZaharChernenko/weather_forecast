@@ -11,26 +11,27 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from WeatherFrame import WeatherFrame
 
+
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(811, 667)
         MainWindow.setStyleSheet("*{\n"
-"    border: none;\n"
-"    background-color: transparent;\n"
-"    background: transparent;\n"
-"    padding: 0;\n"
-"    margin: 0;\n"
-"    color: #fff;\n"
-"}\n"
-"#centralwidget{\n"
-"    background-color: #1f232a;\n"
-"}\n"
-"\n"
-"#slider\n"
-"{\n"
-"    border-right: 1px solid white;\n"
-"}")
+                                 "    border: none;\n"
+                                 "    background-color: transparent;\n"
+                                 "    background: transparent;\n"
+                                 "    padding: 0;\n"
+                                 "    margin: 0;\n"
+                                 "    color: #fff;\n"
+                                 "}\n"
+                                 "#centralwidget{\n"
+                                 "    background-color: #1f232a;\n"
+                                 "}\n"
+                                 "\n"
+                                 "#slider\n"
+                                 "{\n"
+                                 "    border-right: 1px solid white;\n"
+                                 "}")
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.main_hlayout = QtWidgets.QHBoxLayout(self.centralwidget)
@@ -69,20 +70,20 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.button_frame.sizePolicy().hasHeightForWidth())
         self.button_frame.setSizePolicy(sizePolicy)
-        self.button_frame.setMinimumSize(QtCore.QSize(200, 80))
-        self.button_frame.setMaximumSize(QtCore.QSize(200, 80))
+        self.button_frame.setMinimumSize(QtCore.QSize(200, 79))
+        self.button_frame.setMaximumSize(QtCore.QSize(200, 79))
         font = QtGui.QFont()
         font.setPointSize(14)
         self.button_frame.setFont(font)
-        self.button_frame.setStyleSheet("\n"
-"#button_frame{\n"
-"    border-bottom: 1px solid white;\n"
-"}")
+        self.button_frame.setStyleSheet("#button_frame{\n"
+                                        "  background-color: rgba(255, 255, 255, 0.5);\n"
+                                        "  border-radius: 10px;\n"
+                                        "}")
         self.button_frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.button_frame.setFrameShadow(QtWidgets.QFrame.Raised)
         self.button_frame.setObjectName("button_frame")
         self.button_frame_vlayout = QtWidgets.QVBoxLayout(self.button_frame)
-        self.button_frame_vlayout.setContentsMargins(0, 0, 0, 0)
+        self.button_frame_vlayout.setContentsMargins(7, 0, 7, 0)
         self.button_frame_vlayout.setSpacing(0)
         self.button_frame_vlayout.setObjectName("button_frame_vlayout")
         self.main_btn_frame = QtWidgets.QFrame(self.button_frame)
@@ -194,7 +195,10 @@ class Ui_MainWindow(object):
         self.scroll_area_vlayout.addWidget(self.button_frame)
         self.weather_frame1 = WeatherFrame(self.scroll_area_widget)
         self.scroll_area_vlayout.addWidget(self.weather_frame1)
-        spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.MinimumExpanding)
+        self.weather_frame2 = WeatherFrame(self.scroll_area_widget)
+        self.scroll_area_vlayout.addWidget(self.weather_frame2)
+        spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum,
+                                           QtWidgets.QSizePolicy.MinimumExpanding)
         self.scroll_area_vlayout.addItem(spacerItem)
         self.scroll_area.setWidget(self.scroll_area_widget)
         self.slider_vlayout.addWidget(self.scroll_area)
@@ -246,7 +250,7 @@ class Ui_MainWindow(object):
         self.stacked_widget.addWidget(self.page)
         self.page_2 = QtWidgets.QWidget()
         self.page_2.setStyleSheet("background-color: green;\n"
-"")
+                                  "")
         self.page_2.setObjectName("page_2")
         self.pushButton_2 = QtWidgets.QPushButton(self.page_2)
         self.pushButton_2.setGeometry(QtCore.QRect(50, 50, 75, 23))
@@ -254,9 +258,9 @@ class Ui_MainWindow(object):
         self.stacked_widget.addWidget(self.page_2)
         self.main_widget_vlayout.addWidget(self.stacked_widget)
         self.main_hlayout.addWidget(self.main_widget)
-
         MainWindow.setCentralWidget(self.centralwidget)
-
+        self.weather_frame1.temp_btn.released.connect(lambda: self.weather_frame1.background_anim.start())
+        self.weather_frame1.temp_btn.released.connect(self.weather_frame1.changeBorderToActive)
         self.retranslateUi(MainWindow)
         self.stacked_widget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)

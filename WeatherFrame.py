@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QFrame, QSizePolicy, QVBoxLayout, QHBoxLayout, QPushButton
-from PyQt5.QtCore import QSize, Qt
-from PyQt5.QtGui import QCursor, QIcon, QPixmap
+from PyQt5.QtCore import QSize, Qt, QPropertyAnimation, pyqtProperty, QEasingCurve
+from PyQt5.QtGui import QCursor, QIcon, QPixmap, QColor, QPalette
 from setupUi import setupRegularFont
 
 
@@ -18,15 +18,12 @@ class WeatherFrame(QFrame):
         regular_font = setupRegularFont(14)
         self.setFont(regular_font)
         self.setObjectName("button_frame")
-        self.setStyleSheet("\n"
-                           "#button_frame{\n"
-                           "    border-bottom: 1px solid white;\n"
-                           "}")
+        self.setStyleSheet("#button_frame{border-bottom: 1px solid rgba(255, 255, 255, 0.5);}")
         self.setFrameShape(QFrame.StyledPanel)
         self.setFrameShadow(QFrame.Raised)
 
         self.main_vlayout = QVBoxLayout(self)
-        self.main_vlayout.setContentsMargins(0, 0, 0, 0)
+        self.main_vlayout.setContentsMargins(7, 0, 7, 0)
         self.main_vlayout.setSpacing(0)
 
         self.main_btn_frame = QFrame(self)
@@ -118,3 +115,46 @@ class WeatherFrame(QFrame):
         self.time_btn.setText("00:00")
         self.temp_btn.setText("22°")
         self.weather_btn.setText("Макс: 28° | Мин: 22°")
+
+        self.new_property = b"background"
+        self.current_background_color = QPalette.Window
+        self.background_anim = QPropertyAnimation(self, self.new_property)
+        self.background_anim.setStartValue(QColor(255, 255, 255, 0))
+        self.background_anim.setEndValue(QColor(255, 255, 255, 128))
+        self.background_anim.setDuration(200)
+        self.background_anim.setEasingCurve(QEasingCurve.InQuad)
+
+    def parseStyleSheet(self):
+        style_sheet_string = self.styleSheet()
+        style_sheet_list = [s.strip() for s in style_sheet_string.split(';')]
+        return style_sheet_list
+
+    def getBackColor(self):
+        print(self.palette().color(self.current_background_color).getRgb())
+        return self.palette().color(self.current_background_color)
+
+    def setBackColor(self, color):
+        style_sheet_list = self.parseStyleSheet()
+        bg_new = 'background-color: rgba(%d,%d,%d,%d)' % (color.red(), color.green(), color.blue(), color.alpha())
+
+        for i, string in enumerate(style_sheet_list):
+            if 'background-color' in string:
+                style_sheet_list[i] = bg_new
+                break
+        else:
+            style_sheet_list.insert(-1, bg_new)
+
+        # pal = self.palette()
+        # pal.setColor(self.pal_ele, color)
+        # self.setPalette(pal)
+        self.setStyleSheet('; '.join(style_sheet_list))
+
+
+    background = pyqtProperty(QColor, getBackColor, setBackColor)
+
+    def changeBorderToActive(self):
+        style_sheet_list = self.parseStyleSheet()
+        for i, string in enumerate(style_sheet_list):
+            if "border-bottom" in string:
+                style_sheet_list[i] = "#button_frame{border-radius: 10px;"
+        self.setStyleSheet('; '.join(style_sheet_list))
