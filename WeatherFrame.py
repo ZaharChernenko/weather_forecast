@@ -130,7 +130,6 @@ class WeatherFrame(QFrame):
         return style_sheet_list
 
     def getBackColor(self):
-        print(self.palette().color(self.current_background_color).getRgb())
         return self.palette().color(self.current_background_color)
 
     def setBackColor(self, color):
@@ -144,9 +143,6 @@ class WeatherFrame(QFrame):
         else:
             style_sheet_list.insert(-1, bg_new)
 
-        # pal = self.palette()
-        # pal.setColor(self.pal_ele, color)
-        # self.setPalette(pal)
         self.setStyleSheet('; '.join(style_sheet_list))
 
 
@@ -158,3 +154,7 @@ class WeatherFrame(QFrame):
             if "border-bottom" in string:
                 style_sheet_list[i] = "#button_frame{border-radius: 10px;"
         self.setStyleSheet('; '.join(style_sheet_list))
+
+    def animButton(self):
+        self.background_anim.start()
+        self.changeBorderToActive()
