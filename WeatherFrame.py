@@ -5,7 +5,7 @@ from setupUi import setupRegularFont
 
 
 class WeatherFrame(QFrame):
-    def __init__(self, parent):
+    def __init__(self, parent, city_name:str, temp: int, max_temp: int, min_temp: int, icon_name: str):
         super().__init__(parent)
         sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -105,16 +105,16 @@ class WeatherFrame(QFrame):
         self.weather_btn.setCursor(QCursor(Qt.PointingHandCursor))
         self.weather_btn.setStyleSheet("text-align: right;")
         icon = QIcon()
-        icon.addPixmap(QPixmap("icons/10d@2x.png"), QIcon.Normal, QIcon.Off)
+        icon.addPixmap(QPixmap(f"icons/{icon_name}.png"), QIcon.Normal, QIcon.Off)
         self.weather_btn.setIcon(icon)
         self.weather_btn.setIconSize(QSize(36, 36))
         self.weather_btn.setObjectName("weather_btn")
         self.main_vlayout.addWidget(self.weather_btn)
 
-        self.city_btn.setText("Владивосток")
+        self.city_btn.setText(city_name)
         self.time_btn.setText("00:00")
-        self.temp_btn.setText("22°")
-        self.weather_btn.setText("Макс: 28° | Мин: 22°")
+        self.temp_btn.setText(f"{temp}°")
+        self.weather_btn.setText(f"Макс: {max_temp}° | Мин: {min_temp}°")
 
         self.current_background_color = QPalette.Window
         self.background_anim = QPropertyAnimation(self, b"background")
