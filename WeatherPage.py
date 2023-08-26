@@ -9,17 +9,17 @@ class WeatherPage(QWidget):
         super().__init__()
         self.setObjectName("page")
 
-        self.page_vlayout = QVBoxLayout(self)
-        self.page_vlayout.setContentsMargins(0, 0, 0, 0)
-        self.page_vlayout.setSpacing(0)
-        self.page_vlayout.setObjectName("page_vlayout")
+        self.main_vlayout = QVBoxLayout(self)
+        self.main_vlayout.setContentsMargins(0, 0, 0, 0)
+        self.main_vlayout.setSpacing(0)
+        self.main_vlayout.setObjectName("main_vlayout")
 
         self.upper_page_widget = QWidget(self)
-        self.upper_page_widget.setMinimumSize(QSize(0, 54))
-        self.upper_page_widget.setMaximumSize(QSize(16777215, 54))
+        self.upper_page_widget.setMinimumSize(QSize(0, 65))
+        self.upper_page_widget.setMaximumSize(QSize(16777215, 65))
         self.upper_page_widget.setObjectName("upper_page_widget")
         self.upper_page_hlayout = QHBoxLayout(self.upper_page_widget)
-        self.upper_page_hlayout.setContentsMargins(10, 0, 15, 0)
+        self.upper_page_hlayout.setContentsMargins(15, 0, 20, 0)
         self.upper_page_hlayout.setSpacing(0)
         self.upper_page_hlayout.setObjectName("upper_page_hlayout")
 
@@ -37,7 +37,7 @@ class WeatherPage(QWidget):
         self.weather_line_edit.setStyleSheet("border: 1px solid white;")
         self.weather_line_edit.setObjectName("weather_line_edit")
         self.upper_page_hlayout.addWidget(self.weather_line_edit)
-        self.page_vlayout.addWidget(self.upper_page_widget)
+        self.main_vlayout.addWidget(self.upper_page_widget)
 
         self.main_page_widget = QWidget(self)
         sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
@@ -107,29 +107,29 @@ class WeatherPage(QWidget):
         self.hourly_widget.setSizePolicy(sizePolicy)
         self.hourly_widget.setMinimumSize(QSize(0, 145))
         self.hourly_widget.setMaximumSize(QSize(16777215, 145))
+        self.hourly_widget.setObjectName("hourly_widget")
         self.hourly_widget.setStyleSheet("#hourly_widget{\n"
                                          "    background: rgba(255, 255, 255, 64);\n"
                                          "    border-radius: 10px;\n"
                                          "}")
-        self.hourly_widget.setObjectName("hourly_widget")
 
         self.hourly_vlayout = QVBoxLayout(self.hourly_widget)
         self.hourly_vlayout.setContentsMargins(6, 0, 0, 0)
-        self.hourly_vlayout.setObjectName("hourly_vlayout")
+
         self.hourly_frame = QFrame(self.hourly_widget)
         self.hourly_frame.setMinimumSize(QSize(0, 30))
         self.hourly_frame.setMaximumSize(QSize(16777215, 30))
+        self.hourly_frame.setObjectName("hourly_frame")
         self.hourly_frame.setStyleSheet("#hourly_frame{\n"
                                         "    border-bottom: 1px solid #d5d6d7;\n"
                                         "}")
         self.hourly_frame.setFrameShape(QFrame.StyledPanel)
         self.hourly_frame.setFrameShadow(QFrame.Raised)
-        self.hourly_frame.setObjectName("hourly_frame")
+
 
         self.hourly_frame_hlayout = QHBoxLayout(self.hourly_frame)
         self.hourly_frame_hlayout.setContentsMargins(0, 0, 0, 0)
         self.hourly_frame_hlayout.setSpacing(7)
-        self.hourly_frame_hlayout.setObjectName("hourly_frame_hlayout")
 
         self.hourly_icon_label = QLabel(self.hourly_frame)
         sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
@@ -139,7 +139,6 @@ class WeatherPage(QWidget):
         self.hourly_icon_label.setSizePolicy(sizePolicy)
         self.hourly_icon_label.setMinimumSize(QSize(15, 15))
         self.hourly_icon_label.setMaximumSize(QSize(15, 15))
-        self.hourly_icon_label.setText("")
         self.hourly_icon_label.setPixmap(QPixmap("icons/hour_icon.svg"))
         self.hourly_icon_label.setScaledContents(True)
         self.hourly_icon_label.setObjectName("hourly_icon_label")
@@ -153,7 +152,7 @@ class WeatherPage(QWidget):
         self.hourly_frame_hlayout.addWidget(self.hourly_label)
         self.hourly_vlayout.addWidget(self.hourly_frame)
 
-        self.page_vlayout.addWidget(self.main_page_widget)
+        self.main_vlayout.addWidget(self.main_page_widget)
 
         self.hourly_scroll_area = QScrollArea(self.hourly_widget)
         self.hourly_scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
@@ -230,4 +229,13 @@ class WeatherPage(QWidget):
         self.scrollArea_2.setWidget(self.scrollAreaWidgetContents_2)
         self.verticalLayout_2.addWidget(self.scrollArea_2)
         self.main_page_vlayout.addWidget(self.widget_2)
-        self.page_vlayout.addWidget(self.main_page_widget)
+        self.main_vlayout.addWidget(self.main_page_widget)
+
+        self.city_label.setText("Кудрово")
+        self.temp_label.setText("17°")
+        self.weather_label.setText("Солнечно")
+        self.max_min_temp_label.setText("Макс: 22°, мин: 12°")
+        self.hourly_label.setText("Прогноз на 48 часов:")
+        self.hourly_time_label.setText("21")
+        self.hourly_temp_label.setText("16°")
+        self.pushButton_3.setText("PushButton")

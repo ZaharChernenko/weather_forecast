@@ -31,7 +31,7 @@ class WeatherFrame(QFrame):
         self.main_btn_frame = QFrame(self)
         self.main_btn_frame.setFrameShape(QFrame.StyledPanel)
         self.main_btn_frame.setFrameShadow(QFrame.Raised)
-        self.main_btn_frame.setObjectName("main_btn_frame")
+
         self.main_btn_frame_hlayout = QHBoxLayout(self.main_btn_frame)
         self.main_btn_frame_hlayout.setContentsMargins(0, 0, 0, 0)
         self.main_btn_frame_hlayout.setSpacing(0)
@@ -45,11 +45,10 @@ class WeatherFrame(QFrame):
         self.city_time_frame.setMinimumSize(QSize(0, 44))
         self.city_time_frame.setFrameShape(QFrame.StyledPanel)
         self.city_time_frame.setFrameShadow(QFrame.Raised)
-        self.city_time_frame.setObjectName("city_time_frame")
+
         self.city_time_vlayout = QVBoxLayout(self.city_time_frame)
         self.city_time_vlayout.setContentsMargins(0, 0, 0, 0)
         self.city_time_vlayout.setSpacing(0)
-        self.city_time_vlayout.setObjectName("city_time_vlayout")
 
         self.city_btn = QPushButton(self.city_time_frame)
         sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
@@ -65,7 +64,6 @@ class WeatherFrame(QFrame):
         self.city_btn.setAutoDefault(False)
         self.city_btn.setDefault(False)
         self.city_btn.setFlat(False)
-        self.city_btn.setObjectName("city_btn")
         self.city_time_vlayout.addWidget(self.city_btn)
 
         self.time_btn = QPushButton(self.city_time_frame)
@@ -80,7 +78,6 @@ class WeatherFrame(QFrame):
         self.time_btn.setFont(regular_font)
         self.time_btn.setCursor(QCursor(Qt.PointingHandCursor))
         self.time_btn.setStyleSheet("text-align: left;")
-        self.time_btn.setObjectName("time_btn")
         self.city_time_vlayout.addWidget(self.time_btn)
         self.main_btn_frame_hlayout.addWidget(self.city_time_frame)
 
@@ -90,8 +87,8 @@ class WeatherFrame(QFrame):
         regular_font.setPointSize(26)
         self.temp_btn.setFont(regular_font)
         self.temp_btn.setCursor(QCursor(Qt.PointingHandCursor))
-        self.temp_btn.setObjectName("temp_btn")
         self.main_btn_frame_hlayout.addWidget(self.temp_btn, 0, Qt.AlignRight)
+
         self.main_vlayout.addWidget(self.main_btn_frame)
 
         self.weather_btn = QPushButton(self)
@@ -110,7 +107,6 @@ class WeatherFrame(QFrame):
         icon.addPixmap(QPixmap(f"icons/{icon_name}.png"), QIcon.Normal, QIcon.Off)
         self.weather_btn.setIcon(icon)
         self.weather_btn.setIconSize(QSize(36, 36))
-        self.weather_btn.setObjectName("weather_btn")
         self.main_vlayout.addWidget(self.weather_btn)
 
         self.current_city_time_offset = current_city_time_offset
@@ -127,9 +123,8 @@ class WeatherFrame(QFrame):
         self.current_background_color = QPalette.Window
         self.background_anim = QPropertyAnimation(self, b"background")
         self.background_anim.setStartValue(QColor(255, 255, 255, 0))
-        self.background_anim.setEndValue(QColor(255, 255, 255, 128))
+        self.background_anim.setEndValue(QColor(255, 255, 255, 32))
         self.background_anim.setDuration(200)
-        self.background_anim.setEasingCurve(QEasingCurve.InQuad)
 
     def parseStyleSheet(self):
         style_sheet_string = self.styleSheet()
