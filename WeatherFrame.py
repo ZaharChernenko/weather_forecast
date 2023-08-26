@@ -1,19 +1,21 @@
 from PyQt5.QtWidgets import QFrame, QSizePolicy, QVBoxLayout, QHBoxLayout, QPushButton
-from PyQt5.QtCore import QSize, Qt, QPropertyAnimation, pyqtProperty, QEasingCurve
+from PyQt5.QtCore import QSize, Qt, QPropertyAnimation, pyqtProperty, QEasingCurve, QTimer, QTime
 from PyQt5.QtGui import QCursor, QIcon, QPixmap, QColor, QPalette
 from setupUi import setupRegularFont
 
 
+
 class WeatherFrame(QFrame):
-    def __init__(self, parent, city_name:str, temp: int, max_temp: int, min_temp: int, icon_name: str):
+    def __init__(self, parent, city_name: str, temp: int, max_temp: int, min_temp: int, icon_name: str,
+                 current_city_time_offset: int, local_time_offset: int):
         super().__init__(parent)
         sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.sizePolicy().hasHeightForWidth())
         self.setSizePolicy(sizePolicy)
-        self.setMinimumSize(QSize(200, 79))
-        self.setMaximumSize(QSize(200, 79))
+        self.setMinimumSize(QSize(205, 79))
+        self.setMaximumSize(QSize(205, 79))
 
         regular_font = setupRegularFont(14)
         self.setFont(regular_font)
@@ -111,10 +113,16 @@ class WeatherFrame(QFrame):
         self.weather_btn.setObjectName("weather_btn")
         self.main_vlayout.addWidget(self.weather_btn)
 
+        self.current_city_time_offset = current_city_time_offset
+        self.local_time_offset = local_time_offset
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.refreshTime)
+        self.timer.start(60000)
+
         self.city_btn.setText(city_name)
-        self.time_btn.setText("00:00")
         self.temp_btn.setText(f"{temp}°")
         self.weather_btn.setText(f"Макс: {max_temp}° | Мин: {min_temp}°")
+        self.refreshTime()
 
         self.current_background_color = QPalette.Window
         self.background_anim = QPropertyAnimation(self, b"background")
@@ -156,3 +164,8 @@ class WeatherFrame(QFrame):
     def animButton(self):
         self.background_anim.start()
         self.changeBorderToActive()
+
+    def refreshTime(self):
+        current_time = QTime.currentTime()
+        current_time = current_time.addSecs(self.current_city_time_offset - self.local_time_offset)
+        self.time_btn.setText(current_time.toString("hh:mm"))
