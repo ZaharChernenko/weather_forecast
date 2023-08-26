@@ -15,7 +15,7 @@ def setupQCompleter(list):
     completer.setCaseSensitivity(Qt.CaseInsensitive)
     completer.popup().setObjectName("completerPopup")
     completer.setMaxVisibleItems(15)
-    completer.popup().setStyleSheet("color: white; background: transparent; border-radius: 5px;")
+    completer.popup().setStyleSheet("color: white; background: transparent; border-radius: 5px; font-size: 14px;")
     return completer
 
 
