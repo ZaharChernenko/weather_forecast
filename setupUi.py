@@ -1,7 +1,6 @@
-from PyQt5.QtWidgets import QPushButton, QSizePolicy, QGraphicsColorizeEffect, QCompleter, QStyledItemDelegate
+from PyQt5.QtWidgets import QPushButton, QSizePolicy, QGraphicsColorizeEffect, QCompleter
 from PyQt5.QtCore import QSize, Qt, QPropertyAnimation, QEvent, QEasingCurve
 from PyQt5.QtGui import QFont, QCursor, QIcon, QPixmap, QColor
-
 
 
 def setupRegularFont(font_size):
@@ -10,8 +9,8 @@ def setupRegularFont(font_size):
     return regular_font
 
 
-def setupQCompleter(list):
-    completer = QCompleter(list)
+def setupQCompleter(arr):
+    completer = QCompleter(arr)
     completer.setCaseSensitivity(Qt.CaseInsensitive)
     completer.popup().setObjectName("completerPopup")
     completer.setMaxVisibleItems(15)

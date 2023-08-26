@@ -196,8 +196,8 @@ class HourlyElement(QFrame):
     def __init__(self, parent, time: int, icon: str, temp: int, current_city_time_offset: int, local_time_offset: int):
         super().__init__(parent)
 
-        self.setMinimumSize(QSize(58, 90))
-        self.setMaximumSize(QSize(58, 90))
+        self.setMinimumSize(QSize(58, 80))
+        self.setMaximumSize(QSize(58, 80))
         self.setFrameShape(QFrame.StyledPanel)
         self.setFrameShadow(QFrame.Raised)
 
