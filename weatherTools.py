@@ -13,6 +13,7 @@ def getWeatherData(lat, lon):
     data_for_frame.append(int(full_data["daily"][0]["temp"]["max"]))
     data_for_frame.append(int(full_data["daily"][0]["temp"]["min"]))
     data_for_frame.append(full_data["current"]["weather"][0]["icon"])
+    data_for_frame.append(full_data["timezone_offset"])
     return data_for_frame
 
 

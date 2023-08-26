@@ -62,13 +62,13 @@
       </property>
       <property name="minimumSize">
        <size>
-        <width>230</width>
+        <width>235</width>
         <height>0</height>
        </size>
       </property>
       <property name="maximumSize">
        <size>
-        <width>230</width>
+        <width>235</width>
         <height>16777215</height>
        </size>
       </property>
@@ -107,7 +107,7 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>230</width>
+            <width>235</width>
             <height>670</height>
            </rect>
           </property>
@@ -137,13 +137,13 @@
              </property>
              <property name="minimumSize">
               <size>
-               <width>200</width>
+               <width>205</width>
                <height>79</height>
               </size>
              </property>
              <property name="maximumSize">
               <size>
-               <width>200</width>
+               <width>205</width>
                <height>79</height>
               </size>
              </property>
@@ -273,7 +273,7 @@
                        <string notr="true">text-align: left;</string>
                       </property>
                       <property name="text">
-                       <string>Владивосток</string>
+                       <string>Текущее место</string>
                       </property>
                       <property name="autoDefault">
                        <bool>false</bool>
