@@ -3,6 +3,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from WeatherFrame import WeatherFrame
 from weatherTools import getWeatherDataAtCurrentPlace
 from filesTools import readCityList
+from WeatherPage import WeatherPage
 import time
 
 
@@ -91,48 +92,8 @@ class Ui_MainWindow(object):
         self.main_widget_vlayout.setObjectName("main_widget_vlayout")
         self.stacked_widget = QtWidgets.QStackedWidget(self.main_widget)
         self.stacked_widget.setObjectName("stacked_widget")
-        self.page = QtWidgets.QWidget()
-        self.page.setObjectName("page")
-        self.page_vlayout = QtWidgets.QVBoxLayout(self.page)
-        self.page_vlayout.setContentsMargins(0, 0, 0, 0)
-        self.page_vlayout.setSpacing(0)
-        self.page_vlayout.setObjectName("page_vlayout")
-        self.upper_page_widget = QtWidgets.QWidget(self.page)
-        self.upper_page_widget.setMinimumSize(QtCore.QSize(0, 65))
-        self.upper_page_widget.setMaximumSize(QtCore.QSize(16777215, 65))
-        self.upper_page_widget.setObjectName("upper_page_widget")
-        self.upper_page_hlayout = QtWidgets.QHBoxLayout(self.upper_page_widget)
-        self.upper_page_hlayout.setContentsMargins(15, 0, 20, 0)
-        self.upper_page_hlayout.setSpacing(0)
-        self.upper_page_hlayout.setObjectName("upper_page_hlayout")
-        self.slider_btn = CustomButton(self.upper_page_widget)
+        self.page = WeatherPage()
 
-        self.upper_page_hlayout.addWidget(self.slider_btn, 0, QtCore.Qt.AlignBottom)
-        spacerItem1 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.MinimumExpanding,
-                                            QtWidgets.QSizePolicy.Minimum)
-        self.upper_page_hlayout.addItem(spacerItem1)
-        self.weather_line_edit = QtWidgets.QLineEdit(self.upper_page_widget)
-        self.weather_line_edit.setMinimumSize(QtCore.QSize(250, 0))
-        self.weather_line_edit.setMaximumSize(QtCore.QSize(350, 16777215))
-        self.weather_line_edit.setStyleSheet("border: 1px solid white;")
-        self.weather_line_edit.setObjectName("weather_line_edit")
-        font = QtGui.QFont()
-        font.setPointSize(14)
-        self.weather_line_edit.setFont(font)
-        self.weather_line_edit.setPlaceholderText("Поиск:")
-        self.city_list = readCityList()
-        self.weather_line_edit.setCompleter(setupQCompleter([f"{city['name']}, {city['country']}" for city in self.city_list]))
-        self.upper_page_hlayout.addWidget(self.weather_line_edit)
-
-        self.page_vlayout.addWidget(self.upper_page_widget)
-        self.widget_2 = QtWidgets.QWidget(self.page)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Expanding)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.widget_2.sizePolicy().hasHeightForWidth())
-        self.widget_2.setSizePolicy(sizePolicy)
-        self.widget_2.setObjectName("widget_2")
-        self.page_vlayout.addWidget(self.widget_2)
         self.stacked_widget.addWidget(self.page)
         self.page_2 = QtWidgets.QWidget()
         self.page_2.setStyleSheet("background-color: green;\n"
@@ -145,11 +106,11 @@ class Ui_MainWindow(object):
         self.main_widget_vlayout.addWidget(self.stacked_widget)
         self.main_hlayout.addWidget(self.main_widget)
         MainWindow.setCentralWidget(self.centralwidget)
-        self.slider_btn.released.connect(self.slider_btn.icon_anim.start)
+        self.page.slider_btn.released.connect(self.page.slider_btn.icon_anim.start)
         self.retranslateUi(MainWindow)
         self.stacked_widget.setCurrentIndex(0)
 
-        self.slider_btn.clicked.connect(self.sliderAnimation)
+        self.page.slider_btn.clicked.connect(self.sliderAnimation)
         self.weather_btn1.temp_btn.clicked.connect(self.changePage)
         self.weather_btn1.temp_btn.clicked.connect(self.weather_btn1.animButton)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
