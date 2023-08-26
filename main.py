@@ -1,15 +1,15 @@
-from ui_interface import Ui_MainWindow
-from PyQt5 import QtWidgets, QtCore
-
-
+from WeatherWindow import WeatherWindow
+from PyQt5.QtWidgets import QApplication, QMainWindow
+from PyQt5.QtGui import QIcon
 
 if __name__ == "__main__":
     import sys
-    app = QtWidgets.QApplication(sys.argv)
-    screen = QtWidgets.QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(screen)
+
+    app = QApplication(sys.argv)
+    app.setWindowIcon(QIcon("icons/app_icon.ico"))
+
+    screen = QMainWindow()
+    ui = WeatherWindow(screen)
     screen.show()
 
     sys.exit(app.exec())
-

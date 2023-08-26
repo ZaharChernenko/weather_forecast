@@ -1,7 +1,6 @@
-from PyQt5.QtWidgets import QPushButton, QSizePolicy, QGraphicsColorizeEffect, QCompleter, QStyledItemDelegate
+from PyQt5.QtWidgets import QPushButton, QSizePolicy, QGraphicsColorizeEffect, QCompleter
 from PyQt5.QtCore import QSize, Qt, QPropertyAnimation, QEvent, QEasingCurve
 from PyQt5.QtGui import QFont, QCursor, QIcon, QPixmap, QColor
-
 
 
 def setupRegularFont(font_size):
@@ -10,31 +9,29 @@ def setupRegularFont(font_size):
     return regular_font
 
 
-def setupQCompleter(list):
-    completer = QCompleter(list)
+def setupQCompleter(arr):
+    completer = QCompleter(arr)
     completer.setCaseSensitivity(Qt.CaseInsensitive)
     completer.popup().setObjectName("completerPopup")
     completer.setMaxVisibleItems(15)
-    completer.popup().setStyleSheet("color: white; background: transparent; border-radius: 5px; font-size: 14px;")
+    completer.popup().setStyleSheet("color: white; background: rgba(96, 96, 96, 160); border-radius: 5px; font-size: "
+                                    "14px;")
     return completer
 
 
 class CustomButton(QPushButton):
-    def __init__(self, parent):
+    def __init__(self, parent, btn_width, btn_length, icon_width, icon_length, icon_name):
         super().__init__(parent)
         sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.sizePolicy().hasHeightForWidth())
         self.setSizePolicy(sizePolicy)
-        self.setMinimumSize(QSize(50, 50))
-        self.setMaximumSize(QSize(50, 50))
+        self.setMinimumSize(QSize(btn_width, btn_length))
+        self.setMaximumSize(QSize(btn_width, btn_length))
         self.setCursor(QCursor(Qt.PointingHandCursor))
 
         icon = QIcon()
-        icon.addPixmap(QPixmap("icons/slider_icon.svg"), QIcon.Normal, QIcon.Off)
+        icon.addPixmap(QPixmap(f"icons/{icon_name}"), QIcon.Normal, QIcon.Off)
         self.setIcon(icon)
-        self.setIconSize(QSize(45, 45))
+        self.setIconSize(QSize(icon_width, icon_length))
 
         self.color_effect = QGraphicsColorizeEffect()
         self.color_effect.setColor(QColor(255, 255, 255, 128))
