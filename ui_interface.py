@@ -70,8 +70,17 @@ class Ui_MainWindow(object):
         self.scroll_area_vlayout.setObjectName("scroll_area_vlayout")
 
         self.local_timezone_offset = -time.timezone
+        self.current_city_data = getWeatherDataAtCurrentPlace()
+
         self.weather_btn1 = WeatherFrame(self.scroll_area_widget, "Текущее место",
-                                         *getWeatherDataAtCurrentPlace(), self.local_timezone_offset)
+                                         self.current_city_data["cur_temp"],
+                                         self.current_city_data["max"],
+                                         self.current_city_data["min"],
+                                         self.current_city_data["icon"],
+                                         self.current_city_data["timezone_offset"],
+                                         self.local_timezone_offset)
+
+
         self.scroll_area_vlayout.addWidget(self.weather_btn1)
         spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum,
                                            QtWidgets.QSizePolicy.MinimumExpanding)
@@ -92,7 +101,10 @@ class Ui_MainWindow(object):
         self.main_widget_vlayout.setObjectName("main_widget_vlayout")
         self.stacked_widget = QtWidgets.QStackedWidget(self.main_widget)
         self.stacked_widget.setObjectName("stacked_widget")
-        self.page = WeatherPage()
+        self.page = WeatherPage(self.current_city_data["city"], self.current_city_data["cur_temp"],
+                                self.current_city_data["current_weather"], self.current_city_data["max"],
+                                self.current_city_data["min"], self.current_city_data["hourly"],
+                                self.current_city_data["timezone_offset"], self.local_timezone_offset)
 
         self.stacked_widget.addWidget(self.page)
         self.page_2 = QtWidgets.QWidget()
