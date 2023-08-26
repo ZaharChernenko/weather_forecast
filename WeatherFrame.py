@@ -116,9 +116,8 @@ class WeatherFrame(QFrame):
         self.temp_btn.setText("22°")
         self.weather_btn.setText("Макс: 28° | Мин: 22°")
 
-        self.new_property = b"background"
         self.current_background_color = QPalette.Window
-        self.background_anim = QPropertyAnimation(self, self.new_property)
+        self.background_anim = QPropertyAnimation(self, b"background")
         self.background_anim.setStartValue(QColor(255, 255, 255, 0))
         self.background_anim.setEndValue(QColor(255, 255, 255, 128))
         self.background_anim.setDuration(200)
@@ -144,7 +143,6 @@ class WeatherFrame(QFrame):
             style_sheet_list.insert(-1, bg_new)
 
         self.setStyleSheet('; '.join(style_sheet_list))
-
 
     background = pyqtProperty(QColor, getBackColor, setBackColor)
 

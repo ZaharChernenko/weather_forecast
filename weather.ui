@@ -26,10 +26,13 @@
 	background-color: #1f232a;
 }
 
-#slider
-{
+#slider{
 	margin: 15 0 15 0;
 	border-right: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+#weather_line_edit{
+	border-radius: 3px;
 }</string>
   </property>
   <widget class="QWidget" name="centralwidget">
@@ -642,6 +645,11 @@
                   <width>350</width>
                   <height>16777215</height>
                  </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>14</pointsize>
+                 </font>
                 </property>
                 <property name="styleSheet">
                  <string notr="true">border: 1px solid white;</string>
