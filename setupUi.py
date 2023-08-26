@@ -1,12 +1,22 @@
-from PyQt5.QtWidgets import QPushButton, QSizePolicy, QGraphicsColorizeEffect
-from PyQt5.QtCore import QSize, Qt, QPropertyAnimation, QEvent, QEasingCurve, pyqtProperty
-from PyQt5.QtGui import QFont, QCursor, QIcon, QPixmap, QColor, QPalette
+from PyQt5.QtWidgets import QPushButton, QSizePolicy, QGraphicsColorizeEffect, QCompleter, QStyledItemDelegate
+from PyQt5.QtCore import QSize, Qt, QPropertyAnimation, QEvent, QEasingCurve
+from PyQt5.QtGui import QFont, QCursor, QIcon, QPixmap, QColor
+
 
 
 def setupRegularFont(font_size):
     regular_font = QFont()
     regular_font.setPointSize(font_size)
     return regular_font
+
+
+def setupQCompleter(list):
+    completer = QCompleter(list)
+    completer.setCaseSensitivity(Qt.CaseInsensitive)
+    completer.popup().setObjectName("completerPopup")
+    completer.setMaxVisibleItems(15)
+    completer.popup().setStyleSheet("color: white; background: transparent; border-radius: 5px;")
+    return completer
 
 
 class CustomButton(QPushButton):
@@ -20,7 +30,6 @@ class CustomButton(QPushButton):
         self.setMinimumSize(QSize(50, 50))
         self.setMaximumSize(QSize(50, 50))
         self.setCursor(QCursor(Qt.PointingHandCursor))
-        self.setStyleSheet("border-radius: 5px;")
 
         icon = QIcon()
         icon.addPixmap(QPixmap("icons/slider_icon.svg"), QIcon.Normal, QIcon.Off)
