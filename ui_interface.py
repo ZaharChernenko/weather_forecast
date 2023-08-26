@@ -1,6 +1,7 @@
 from setupUi import CustomButton, setupQCompleter
 from PyQt5 import QtCore, QtGui, QtWidgets
 from WeatherFrame import WeatherFrame
+from weatherTools import getWeatherDataAtCurrentPlace
 from filesTools import readCityList
 
 
@@ -185,14 +186,14 @@ class Ui_MainWindow(object):
         self.weather_btn.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.weather_btn.setStyleSheet("text-align: right;")
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("icons/10d@2x.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap("icons/10d.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.weather_btn.setIcon(icon)
         self.weather_btn.setIconSize(QtCore.QSize(36, 36))
         self.weather_btn.setObjectName("weather_btn")
         self.weather_hlayout.addWidget(self.weather_btn)
         self.button_frame_vlayout.addWidget(self.weather_frame)
         self.scroll_area_vlayout.addWidget(self.button_frame)
-        self.weather_btn1 = WeatherFrame(self.scroll_area_widget)
+        self.weather_btn1 = WeatherFrame(self.scroll_area_widget, "Текущее место", *getWeatherDataAtCurrentPlace())
         self.scroll_area_vlayout.addWidget(self.weather_btn1)
         spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum,
                                            QtWidgets.QSizePolicy.MinimumExpanding)
