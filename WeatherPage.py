@@ -1,13 +1,15 @@
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QSizePolicy, QSpacerItem, QLineEdit,
-                             QLabel, QFrame, QScrollArea, QPushButton)
+                             QLabel, QFrame, QScrollArea)
 from PyQt5.QtCore import QSize, Qt, QRect
 from PyQt5.QtGui import QPixmap
 import datetime
 from setupUi import setupRegularFont
 from setupUi import CustomButton
+
+
 class WeatherPage(QWidget):
     def __init__(self, city_name: str, cur_temp: int, weather: str, max_temp: int, min_temp: int, hourly_list: list,
-                 current_city_time_offset: int, local_time_offset: int):
+                 current_city_time_offset: int, local_time_offset: int, completer):
         super().__init__()
         self.setObjectName("page")
 
@@ -35,6 +37,7 @@ class WeatherPage(QWidget):
         font = setupRegularFont(14)
         self.weather_line_edit.setFont(font)
         self.weather_line_edit.setStyleSheet("border: 1px solid white; border-radius: 3px;")
+        self.weather_line_edit.setCompleter(completer)
         self.upper_page_hlayout.addWidget(self.weather_line_edit)
         self.main_vlayout.addWidget(self.upper_page_widget)
 
@@ -92,7 +95,18 @@ class WeatherPage(QWidget):
         spacerItem2 = QSpacerItem(20, 25, QSizePolicy.Minimum, QSizePolicy.Fixed)
         self.main_page_vlayout.addItem(spacerItem2)
 
-        self.hourly_widget = QWidget(self.main_page_widget)
+        self.main_page_scroll_area = QScrollArea(self.main_page_widget)
+        self.main_page_scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.main_page_scroll_area.setWidgetResizable(True)
+
+        self.main_page_scroll_widget = QWidget()
+        self.main_page_scroll_widget.setGeometry(QRect(0, 0, 560, 1245))
+
+        self.main_page_scroll_vlayout = QVBoxLayout(self.main_page_scroll_widget)
+        self.main_page_scroll_vlayout.setContentsMargins(0, 0, 0, 0)
+        self.main_page_scroll_vlayout.setSpacing(0)
+
+        self.hourly_widget = QWidget(self.main_page_scroll_widget)
         sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -118,7 +132,6 @@ class WeatherPage(QWidget):
                                         "}")
         self.hourly_frame.setFrameShape(QFrame.StyledPanel)
         self.hourly_frame.setFrameShadow(QFrame.Raised)
-
 
         self.hourly_frame_hlayout = QHBoxLayout(self.hourly_frame)
         self.hourly_frame_hlayout.setContentsMargins(0, 0, 0, 0)
@@ -159,23 +172,14 @@ class WeatherPage(QWidget):
 
         self.hourly_scroll_area.setWidget(self.hourly_scroll_area_widget)
         self.hourly_vlayout.addWidget(self.hourly_scroll_area)
-        self.main_page_vlayout.addWidget(self.hourly_widget)
+        self.main_page_scroll_vlayout.addWidget(self.hourly_widget)
 
-        self.widget_2 = QWidget(self.main_page_widget)
-        self.widget_2.setMinimumSize(QSize(0, 50))
-        self.widget_3 = QWidget(self.widget_2)
-        self.widget_3.setGeometry(QRect(100, 40, 87, 106))
-        self.verticalLayout_2 = QVBoxLayout(self.widget_3)
-        self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
-        self.pushButton_3 = QPushButton(self.widget_3)
-        self.verticalLayout_2.addWidget(self.pushButton_3)
-        self.scrollArea_2 = QScrollArea(self.widget_3)
-        self.scrollArea_2.setWidgetResizable(True)
-        self.scrollAreaWidgetContents_2 = QWidget()
-        self.scrollAreaWidgetContents_2.setGeometry(QRect(0, 0, 69, 69))
-        self.scrollArea_2.setWidget(self.scrollAreaWidgetContents_2)
-        self.verticalLayout_2.addWidget(self.scrollArea_2)
-        self.main_page_vlayout.addWidget(self.widget_2)
+        self.widget = QWidget(self.main_page_scroll_widget)
+        self.widget.setMinimumSize(QSize(0, 1100))
+        self.widget.setObjectName("widget")
+        self.main_page_scroll_vlayout.addWidget(self.widget)
+        self.main_page_scroll_area.setWidget(self.main_page_scroll_widget)
+        self.main_page_vlayout.addWidget(self.main_page_scroll_area)
         self.main_vlayout.addWidget(self.main_page_widget)
 
         self.city_label.setText(city_name)
@@ -189,8 +193,6 @@ class WeatherPage(QWidget):
                                                                     current_city_time_offset,
                                                                     local_time_offset))
 
-
-        self.pushButton_3.setText("PushButton")
 
 class HourlyElement(QFrame):
     def __init__(self, parent, time: int, icon: str, temp: int, current_city_time_offset: int, local_time_offset: int):
@@ -237,4 +239,3 @@ class HourlyElement(QFrame):
         self.hourly_temp_label.setText(f"{temp}°")
         self.time = time + current_city_time_offset - local_time_offset
         self.hourly_time_label.setText(datetime.datetime.fromtimestamp(self.time).strftime("%H"))
-

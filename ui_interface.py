@@ -20,7 +20,7 @@ class Ui_MainWindow(object):
                                  "    margin: 0;\n"
                                  "    color: #fff;\n"
                                  "}\n"
-                                 "#centralwidget{\n"
+                                 "#central_widget{\n"
                                  "    background-color: #1f232a;\n"
                                  "}\n"
                                  "\n"
@@ -34,15 +34,16 @@ class Ui_MainWindow(object):
                                  "    padding-left: 2px;\n"
                                  "}"
                                  )
-        self.centralwidget = QtWidgets.QWidget(MainWindow)
-        self.centralwidget.setObjectName("centralwidget")
-        self.is_expanded = True
+        self.central_widget = QtWidgets.QWidget(MainWindow)
+        self.central_widget.setObjectName("central_widget")
 
-        self.main_hlayout = QtWidgets.QHBoxLayout(self.centralwidget)
+        self.main_hlayout = QtWidgets.QHBoxLayout(self.central_widget)
         self.main_hlayout.setContentsMargins(0, 0, 0, 0)
         self.main_hlayout.setSpacing(0)
         self.main_hlayout.setObjectName("main_hlayout")
-        self.slider = QtWidgets.QWidget(self.centralwidget)
+
+        self.is_expanded = True
+        self.slider = QtWidgets.QWidget(self.central_widget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -50,12 +51,12 @@ class Ui_MainWindow(object):
         self.slider.setSizePolicy(sizePolicy)
         self.slider.setMinimumSize(QtCore.QSize(235, 0))
         self.slider.setMaximumSize(QtCore.QSize(235, 16777215))
-        self.slider.setStyleSheet("")
         self.slider.setObjectName("slider")
+
         self.slider_vlayout = QtWidgets.QVBoxLayout(self.slider)
         self.slider_vlayout.setContentsMargins(0, 0, 0, 0)
         self.slider_vlayout.setSpacing(0)
-        self.slider_vlayout.setObjectName("slider_vlayout")
+
         self.scroll_area = QtWidgets.QScrollArea(self.slider)
         self.scroll_area.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.scroll_area.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
@@ -72,23 +73,22 @@ class Ui_MainWindow(object):
         self.local_timezone_offset = -time.timezone
         self.current_city_data = getWeatherDataAtCurrentPlace()
 
-        self.weather_btn1 = WeatherFrame(self.scroll_area_widget, "Текущее место",
-                                         self.current_city_data["cur_temp"],
-                                         self.current_city_data["max"],
-                                         self.current_city_data["min"],
-                                         self.current_city_data["icon"],
-                                         self.current_city_data["timezone_offset"],
-                                         self.local_timezone_offset)
+        self.current_city_frame = WeatherFrame(self.scroll_area_widget, "Текущее место",
+                                               self.current_city_data["cur_temp"],
+                                               self.current_city_data["max"],
+                                               self.current_city_data["min"],
+                                               self.current_city_data["icon"],
+                                               self.current_city_data["timezone_offset"],
+                                               self.local_timezone_offset)
+        self.scroll_area_vlayout.addWidget(self.current_city_frame)
 
-
-        self.scroll_area_vlayout.addWidget(self.weather_btn1)
         spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum,
                                            QtWidgets.QSizePolicy.MinimumExpanding)
         self.scroll_area_vlayout.addItem(spacerItem)
         self.scroll_area.setWidget(self.scroll_area_widget)
         self.slider_vlayout.addWidget(self.scroll_area)
         self.main_hlayout.addWidget(self.slider)
-        self.main_widget = QtWidgets.QWidget(self.centralwidget)
+        self.main_widget = QtWidgets.QWidget(self.central_widget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -101,10 +101,16 @@ class Ui_MainWindow(object):
         self.main_widget_vlayout.setObjectName("main_widget_vlayout")
         self.stacked_widget = QtWidgets.QStackedWidget(self.main_widget)
         self.stacked_widget.setObjectName("stacked_widget")
+
+        self.city_list = readCityList()
+        self.completer = setupQCompleter([f"{city['name']}, {city['country']}" for city in self.city_list])
         self.page = WeatherPage(self.current_city_data["city"], self.current_city_data["cur_temp"],
                                 self.current_city_data["current_weather"], self.current_city_data["max"],
-                                self.current_city_data["min"], self.current_city_data["hourly"],
-                                self.current_city_data["timezone_offset"], self.local_timezone_offset)
+                                self.current_city_data["min"],
+                                hourly_list=self.current_city_data["hourly"],
+                                current_city_time_offset=self.current_city_data["timezone_offset"],
+                                local_time_offset=self.local_timezone_offset,
+                                completer=self.completer)
 
         self.stacked_widget.addWidget(self.page)
         self.page_2 = QtWidgets.QWidget()
@@ -117,14 +123,14 @@ class Ui_MainWindow(object):
         self.stacked_widget.addWidget(self.page_2)
         self.main_widget_vlayout.addWidget(self.stacked_widget)
         self.main_hlayout.addWidget(self.main_widget)
-        MainWindow.setCentralWidget(self.centralwidget)
+        MainWindow.setCentralWidget(self.central_widget)
         self.page.slider_btn.released.connect(self.page.slider_btn.icon_anim.start)
         self.retranslateUi(MainWindow)
         self.stacked_widget.setCurrentIndex(0)
 
         self.page.slider_btn.clicked.connect(self.sliderAnimation)
-        self.weather_btn1.temp_btn.clicked.connect(self.changePage)
-        self.weather_btn1.temp_btn.clicked.connect(self.weather_btn1.animButton)
+        self.current_city_frame.temp_btn.clicked.connect(self.changePage)
+        self.current_city_frame.temp_btn.clicked.connect(self.current_city_frame.animButton)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -171,7 +177,7 @@ class Ui_MainWindow(object):
             self.stacked_widget.setCurrentIndex(1)
             self.animation_expansion_max.setDuration(800)
             self.animation_expansion_max.setStartValue(
-                QtCore.QRect(0, -self.centralwidget.height(), self.stacked_widget.width(),
+                QtCore.QRect(0, -self.central_widget.height(), self.stacked_widget.width(),
                              self.stacked_widget.height()))
             self.animation_expansion_max.setEndValue(
                 QtCore.QRect(0, 0, self.stacked_widget.width(), self.stacked_widget.height()))
