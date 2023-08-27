@@ -1,11 +1,10 @@
 from setupUi import CustomButton, setupQCompleter
 from PyQt5 import QtCore, QtGui, QtWidgets
 from WeatherFrame import WeatherFrame
-from weatherTools import getWeatherDataAtCurrentPlace
+from weatherTools import getWeatherDataAtCurrentPlace, getWeatherData
 from filesTools import readCityList
 from WeatherPage import WeatherPage
 import time
-
 
 
 class Ui_MainWindow(object):
@@ -102,41 +101,37 @@ class Ui_MainWindow(object):
         self.stacked_widget = QtWidgets.QStackedWidget(self.main_widget)
         self.stacked_widget.setObjectName("stacked_widget")
 
-        self.city_list = readCityList()
-        self.completer = setupQCompleter([f"{city['name']}, {city['country']}" for city in self.city_list])
-        self.page = WeatherPage(self.current_city_data["city"], self.current_city_data["cur_temp"],
-                                self.current_city_data["current_weather"], self.current_city_data["max"],
-                                self.current_city_data["min"],
-                                hourly_list=self.current_city_data["hourly"],
-                                current_city_time_offset=self.current_city_data["timezone_offset"],
-                                local_time_offset=self.local_timezone_offset,
-                                completer=self.completer)
+        self.cities_list = readCityList()
+        self.city_pages_list = []
+        self.completer = setupQCompleter([f"{city['name']}, {city['country']}" for city in self.cities_list])
+        self.current_city_page = WeatherPage(self.current_city_data["city"], self.current_city_data["cur_temp"],
+                                             self.current_city_data["current_weather"], self.current_city_data["max"],
+                                             self.current_city_data["min"],
+                                             hourly_list=self.current_city_data["hourly"],
+                                             current_city_time_offset=self.current_city_data["timezone_offset"],
+                                             local_time_offset=self.local_timezone_offset,
+                                             completer=self.completer)
+        self.city_pages_list.append(self.current_city_page)
+        self.stacked_widget.addWidget(self.current_city_page)
 
-        self.stacked_widget.addWidget(self.page)
-        self.page_2 = QtWidgets.QWidget()
-        self.page_2.setStyleSheet("background-color: green;\n"
-                                  "")
-        self.page_2.setObjectName("page_2")
-        self.pushButton_2 = QtWidgets.QPushButton(self.page_2)
-        self.pushButton_2.setGeometry(QtCore.QRect(50, 50, 75, 23))
-        self.pushButton_2.setObjectName("pushButton_2")
-        self.stacked_widget.addWidget(self.page_2)
         self.main_widget_vlayout.addWidget(self.stacked_widget)
         self.main_hlayout.addWidget(self.main_widget)
         MainWindow.setCentralWidget(self.central_widget)
-        self.page.slider_btn.released.connect(self.page.slider_btn.icon_anim.start)
+        self.current_city_page.slider_btn.released.connect(self.current_city_page.slider_btn.icon_anim.start)
         self.retranslateUi(MainWindow)
         self.stacked_widget.setCurrentIndex(0)
 
-        self.page.slider_btn.clicked.connect(self.sliderAnimation)
+        self.current_city_page.slider_btn.clicked.connect(self.sliderAnimation)
         self.current_city_frame.temp_btn.clicked.connect(self.changePage)
         self.current_city_frame.temp_btn.clicked.connect(self.current_city_frame.animButton)
+        self.current_city_page.completer.activated.connect(
+            lambda: self.createPage(self.current_city_page.weather_line_edit.text()))
+
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
-        self.pushButton_2.setText(_translate("MainWindow", "2"))
 
     def sliderAnimation(self):
         if self.is_expanded:
@@ -171,19 +166,31 @@ class Ui_MainWindow(object):
             self.animation_compression_min.start()
             self.is_expanded = True
 
-    def changePage(self):
-        if self.stacked_widget.currentIndex() == 0:
-            self.animation_expansion_max = QtCore.QPropertyAnimation(self.page_2, b"geometry")
-            self.stacked_widget.setCurrentIndex(1)
-            self.animation_expansion_max.setDuration(800)
-            self.animation_expansion_max.setStartValue(
-                QtCore.QRect(0, -self.central_widget.height(), self.stacked_widget.width(),
-                             self.stacked_widget.height()))
-            self.animation_expansion_max.setEndValue(
-                QtCore.QRect(0, 0, self.stacked_widget.width(), self.stacked_widget.height()))
-            self.animation_expansion_max.setEasingCurve(QtCore.QEasingCurve.OutBack)
-            self.animation_expansion_max.start()
+    def changePage(self, page, index):
+        self.animation_page = QtCore.QPropertyAnimation(page, b"geometry")
+        self.stacked_widget.setCurrentIndex(index)
+        self.animation_page.setDuration(800)
+        self.animation_page.setStartValue(
+            QtCore.QRect(0, -self.central_widget.height(), self.stacked_widget.width(),
+                         self.stacked_widget.height()))
+        self.animation_page.setEndValue(
+            QtCore.QRect(0, 0, self.stacked_widget.width(), self.stacked_widget.height()))
+        self.animation_page.setEasingCurve(QtCore.QEasingCurve.OutBack)
+        self.animation_page.start()
 
-
-        else:
-            self.stacked_widget.setCurrentIndex(0)
+    def createPage(self, city_country):
+        city_name, country_name = city_country.split(", ")
+        for city in self.cities_list:
+            if city["name"] == city_name and city["country"] == country_name:
+                weather_data = getWeatherData(city["coord"]["lat"], city["coord"]["lon"])
+                self.city_pages_list.append(
+                    WeatherPage(city_name, self.current_city_data["cur_temp"],
+                                weather_data["current_weather"], weather_data["max"],
+                                weather_data["min"],
+                                hourly_list=weather_data["hourly"],
+                                current_city_time_offset=weather_data["timezone_offset"],
+                                local_time_offset=self.local_timezone_offset,
+                                completer=self.completer))
+                self.stacked_widget.addWidget(self.city_pages_list[-1])
+                self.changePage(self.city_pages_list[-1], len(self.city_pages_list) - 1)
+                break

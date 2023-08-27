@@ -37,7 +37,8 @@ class WeatherPage(QWidget):
         font = setupRegularFont(14)
         self.weather_line_edit.setFont(font)
         self.weather_line_edit.setStyleSheet("border: 1px solid white; border-radius: 3px;")
-        self.weather_line_edit.setCompleter(completer)
+        self.completer = completer
+        self.weather_line_edit.setCompleter(self.completer)
         self.upper_page_hlayout.addWidget(self.weather_line_edit)
         self.main_vlayout.addWidget(self.upper_page_widget)
 
@@ -192,6 +193,7 @@ class WeatherPage(QWidget):
                                                                     hour["icon"], hour["temp"],
                                                                     current_city_time_offset,
                                                                     local_time_offset))
+
 
 
 class HourlyElement(QFrame):

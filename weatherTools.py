@@ -6,6 +6,7 @@ import json
 weather_translator = gettext.translation('weather', './locale', languages=['ru'])
 weather_translator.install()
 
+
 def getWeatherData(lat, lon):
     full_data = requests.get(f"https://openweathermap.org/data/2.5/onecall?lat={lat}&lon={lon}&units=metric&appid"
                              f"=439d4b804bc8187953eb36d2a8c26a02").json()
@@ -31,7 +32,3 @@ def getWeatherDataAtCurrentPlace():
     data_dict = getWeatherData(*g.latlng)
     data_dict.update({"city": g.city})
     return data_dict
-
-
-
-
