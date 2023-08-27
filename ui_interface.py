@@ -120,18 +120,16 @@ class Ui_MainWindow(object):
         self.current_city_page.slider_btn.released.connect(self.current_city_page.slider_btn.icon_anim.start)
         self.retranslateUi(MainWindow)
         self.stacked_widget.setCurrentIndex(0)
+        self.active = 0
 
-        self.current_city_page.slider_btn.clicked.connect(self.sliderAnimation)
-        self.current_city_frame.temp_btn.clicked.connect(self.changePage)
+        #self.current_city_frame.temp_btn.clicked.connect(self.changePage)
         self.current_city_frame.temp_btn.clicked.connect(self.current_city_frame.animButton)
         self.current_city_page.completer.activated.connect(
             lambda: self.createPage(self.current_city_page.weather_line_edit.text()))
-
-        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+        self.current_city_page.slider_btn.clicked.connect(self.sliderAnimation)
 
     def retranslateUi(self, MainWindow):
-        _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        MainWindow.setWindowTitle("Прогноз погоды")
 
     def sliderAnimation(self):
         if self.is_expanded:
@@ -167,9 +165,17 @@ class Ui_MainWindow(object):
             self.is_expanded = True
 
     def changePage(self, page, index):
+        self.animation_cur_page = QtCore.QPropertyAnimation(self.stacked_widget.currentWidget(), b"geometry")
+        self.animation_cur_page.setDuration(1000)
+        self.animation_cur_page.setStartValue(QtCore.QRect(0, 0, self.stacked_widget.width(),
+                                                           self.stacked_widget.height()))
+        self.animation_cur_page.setEndValue(QtCore.QRect(0, 0, self.stacked_widget.width(),
+                                                         -self.stacked_widget.height()))
+        self.animation_cur_page.start()
+
         self.animation_page = QtCore.QPropertyAnimation(page, b"geometry")
         self.stacked_widget.setCurrentIndex(index)
-        self.animation_page.setDuration(800)
+        self.animation_page.setDuration(500)
         self.animation_page.setStartValue(
             QtCore.QRect(0, -self.central_widget.height(), self.stacked_widget.width(),
                          self.stacked_widget.height()))
@@ -177,6 +183,7 @@ class Ui_MainWindow(object):
             QtCore.QRect(0, 0, self.stacked_widget.width(), self.stacked_widget.height()))
         self.animation_page.setEasingCurve(QtCore.QEasingCurve.OutBack)
         self.animation_page.start()
+        self.city_pages_list[index].slider_btn.clicked.connect(self.sliderAnimation)
 
     def createPage(self, city_country):
         city_name, country_name = city_country.split(", ")
@@ -192,5 +199,7 @@ class Ui_MainWindow(object):
                                 local_time_offset=self.local_timezone_offset,
                                 completer=self.completer))
                 self.stacked_widget.addWidget(self.city_pages_list[-1])
+                self.active = len(self.city_pages_list) - 1
                 self.changePage(self.city_pages_list[-1], len(self.city_pages_list) - 1)
+
                 break
