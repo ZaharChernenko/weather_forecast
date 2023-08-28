@@ -10,12 +10,19 @@ from setupUi import CustomButton
 
 class WeatherPage(QWidget):
     def __init__(self, city_name: str, city_lat: float, city_lon: float,
-                 cur_temp: int, weather: str, max_temp: int, min_temp: int, hourly_list: list,
+                 cur_temp: int, weather: str, icon_name: str, max_temp: int, min_temp: int, hourly_list: list,
                  current_city_time_offset: int, local_time_offset: int, completer, is_added: bool):
         super().__init__()
 
         self._is_added = is_added
+
         self._city_name = city_name
+        self._cur_temp = cur_temp
+        self._max_temp = max_temp
+        self._min_temp = min_temp
+        self._icon_name = icon_name
+        self._current_city_time_offset = current_city_time_offset
+
         self._city_lat = city_lat
         self._city_lon = city_lon
 
@@ -44,7 +51,7 @@ class WeatherPage(QWidget):
                                             "add_icon.svg")
             else:
                 self.add_btn = CustomButton(self.upper_page_widget, 27, 27, 27, 27,
-                                       "add_icon.svg")
+                                            "add_icon.svg")
             self.add_btn.setStyleSheet("border: 2px solid; border-radius: 3px")
             self.upper_page_hlayout.addWidget(self.add_btn)
 
@@ -192,14 +199,14 @@ class WeatherPage(QWidget):
         self.main_vlayout.addWidget(self.main_page_widget)
 
         self.city_label.setText(self._city_name)
-        self.temp_label.setText(f"{cur_temp}°")
+        self.temp_label.setText(f"{self._cur_temp}°")
         self.weather_label.setText(weather)
-        self.max_min_temp_label.setText(f"Макс: {max_temp}°, мин: {min_temp}°")
+        self.max_min_temp_label.setText(f"Макс: {self._max_temp}°, мин: {self._min_temp}°")
         self.hourly_label.setText("Прогноз на 48 часов:")
         for hour in hourly_list:
             self.hourly_scroll_area_hlayout.addWidget(HourlyElement(self.hourly_scroll_area_widget, hour["dt"],
                                                                     hour["icon"], hour["temp"],
-                                                                    current_city_time_offset,
+                                                                    self._current_city_time_offset,
                                                                     local_time_offset))
 
     def getAdd(self):
@@ -210,6 +217,11 @@ class WeatherPage(QWidget):
 
     def getCityDict(self):
         return {"name": self._city_name, "coord": {"lat": self._city_lat, "lon": self._city_lon}}
+
+    def getDataToWeatherFrame(self):
+        return (self._current_city_time_offset, self._city_name, self._cur_temp, self._max_temp, self._min_temp,
+                self._icon_name)
+
 
 class HourlyElement(QFrame):
     def __init__(self, parent, time: int, icon: str, temp: int, current_city_time_offset: int, local_time_offset: int):

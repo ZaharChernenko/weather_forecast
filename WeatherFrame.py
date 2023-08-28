@@ -6,8 +6,8 @@ from setupUi import setupRegularFont
 
 
 class WeatherFrame(QFrame):
-    def __init__(self, parent, city_name: str, temp: int, max_temp: int, min_temp: int, icon_name: str,
-                 current_city_time_offset: int, local_time_offset: int):
+    def __init__(self, parent, local_time_offset: int, current_city_time_offset: int,
+                 city_name: str, temp: int, max_temp: int, min_temp: int, icon_name: str):
         super().__init__(parent)
         sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -113,7 +113,7 @@ class WeatherFrame(QFrame):
         self.local_time_offset = local_time_offset
         self.timer = QTimer()
         self.timer.timeout.connect(self.refreshTime)
-        self.timer.start(60000)
+        self.timer.start(5000)
 
         self.city_btn.setText(city_name)
         self.temp_btn.setText(f"{temp}°")
