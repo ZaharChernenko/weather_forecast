@@ -2,9 +2,10 @@ from setupUi import CustomButton, setupQCompleter
 from PyQt5 import QtCore, QtGui, QtWidgets
 from WeatherFrame import WeatherFrame
 from weatherTools import getWeatherDataAtCurrentPlace, getWeatherData
-from filesTools import readCityList
+from filesTools import loadUserData, readCityList
 from WeatherPage import WeatherPage
 import time
+import os
 
 
 class Ui_MainWindow(object):
@@ -80,6 +81,7 @@ class Ui_MainWindow(object):
                                                self.current_city_data["timezone_offset"],
                                                self.local_timezone_offset)
         self.scroll_area_vlayout.addWidget(self.current_city_frame)
+        self.city_frames_list = [self.current_city_frame]
 
         spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum,
                                            QtWidgets.QSizePolicy.MinimumExpanding)
@@ -103,16 +105,16 @@ class Ui_MainWindow(object):
 
         self.cities_list = readCityList()
         self.completer = setupQCompleter([f"{city['name']}, {city['country']}" for city in self.cities_list])
-        self.current_city_page = WeatherPage(self.current_city_data["city"], self.current_city_data["cur_temp"],
+        self.current_city_page = WeatherPage(self.current_city_data["city"], self.current_city_data["coord"]["lat"],
+                                             self.current_city_data["coord"]["lon"], self.current_city_data["cur_temp"],
                                              self.current_city_data["current_weather"], self.current_city_data["max"],
                                              self.current_city_data["min"],
                                              hourly_list=self.current_city_data["hourly"],
                                              current_city_time_offset=self.current_city_data["timezone_offset"],
                                              local_time_offset=self.local_timezone_offset,
                                              completer=self.completer, is_added=True)
-        self.city_pages_list = [self.current_city_page]
-        self.added_cities = [self.current_city_frame]
         self.stacked_widget.addWidget(self.current_city_page)
+        self.city_pages_list = [self.current_city_page]
 
         self.main_widget_vlayout.addWidget(self.stacked_widget)
         self.main_hlayout.addWidget(self.main_widget)
@@ -120,6 +122,14 @@ class Ui_MainWindow(object):
         self.current_city_page.slider_btn.released.connect(self.current_city_page.slider_btn.icon_anim.start)
         self.retranslateUi(MainWindow)
         self.stacked_widget.setCurrentIndex(0)
+
+        if os.path.isfile("./data/user_data.json"):
+            user_data = loadUserData()
+            if user_data:
+                self.city_frames_list += user_data
+                for city in self.city_frames_list[1:]:
+                    self.city_frames_list.append(0)
+
 
         #self.current_city_frame.temp_btn.clicked.connect(self.changePage)
         self.current_city_frame.temp_btn.clicked.connect(self.current_city_frame.animButton)
@@ -189,7 +199,8 @@ class Ui_MainWindow(object):
             if city["name"] == city_name and city["country"] == country_name:
                 weather_data = getWeatherData(city["coord"]["lat"], city["coord"]["lon"])
                 self.city_pages_list.append(
-                    WeatherPage(city_name, self.current_city_data["cur_temp"],
+                    WeatherPage(city_name, city["coord"]["lat"], city["coord"]["lon"],
+                                self.current_city_data["cur_temp"],
                                 weather_data["current_weather"], weather_data["max"],
                                 weather_data["min"],
                                 hourly_list=weather_data["hourly"],
@@ -201,3 +212,6 @@ class Ui_MainWindow(object):
                 self.changePage(self.city_pages_list[-1], len(self.city_pages_list) - 1)
 
                 break
+
+    def addCity(self, city_dict):
+        self.

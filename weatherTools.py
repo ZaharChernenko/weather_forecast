@@ -31,4 +31,8 @@ def getWeatherDataAtCurrentPlace():
     print(g.city)
     data_dict = getWeatherData(*g.latlng)
     data_dict.update({"city": g.city})
+    data_dict.update({"coord": {
+        "lat": g.latlng[0],
+        "lon": g.latlng[1]
+    }})
     return data_dict

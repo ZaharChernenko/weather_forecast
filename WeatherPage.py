@@ -9,11 +9,15 @@ from setupUi import CustomButton
 
 
 class WeatherPage(QWidget):
-    def __init__(self, city_name: str, cur_temp: int, weather: str, max_temp: int, min_temp: int, hourly_list: list,
+    def __init__(self, city_name: str, city_lat: float, city_lon: float,
+                 cur_temp: int, weather: str, max_temp: int, min_temp: int, hourly_list: list,
                  current_city_time_offset: int, local_time_offset: int, completer, is_added: bool):
         super().__init__()
 
         self._is_added = is_added
+        self._city_name = city_name
+        self._city_lat = city_lat
+        self._city_lon = city_lon
 
         self.main_vlayout = QVBoxLayout(self)
         self.main_vlayout.setContentsMargins(0, 0, 0, 0)
@@ -34,7 +38,7 @@ class WeatherPage(QWidget):
         spacerItem1 = QSpacerItem(40, 20, QSizePolicy.MinimumExpanding, QSizePolicy.Minimum)
         self.upper_page_hlayout.addItem(spacerItem1)
 
-        if self._is_added:
+        if not self._is_added:
             if sys.platform == "darwin":
                 self.add_btn = CustomButton(self.upper_page_widget, 23, 23, 23, 23,
                                             "add_icon.svg")
@@ -187,7 +191,7 @@ class WeatherPage(QWidget):
         self.main_page_vlayout.addWidget(self.main_page_scroll_area)
         self.main_vlayout.addWidget(self.main_page_widget)
 
-        self.city_label.setText(city_name)
+        self.city_label.setText(self._city_name)
         self.temp_label.setText(f"{cur_temp}°")
         self.weather_label.setText(weather)
         self.max_min_temp_label.setText(f"Макс: {max_temp}°, мин: {min_temp}°")
@@ -204,6 +208,8 @@ class WeatherPage(QWidget):
     def setAdd(self, is_added: bool):
         self._is_added = is_added
 
+    def getCityDict(self):
+        return {"name": self._city_name, "coord": {"lat": self._city_lat, "lon": self._city_lon}}
 
 class HourlyElement(QFrame):
     def __init__(self, parent, time: int, icon: str, temp: int, current_city_time_offset: int, local_time_offset: int):
