@@ -79,7 +79,6 @@ class Ui_MainWindow(object):
                                                self.current_city_data["icon"],
                                                self.current_city_data["timezone_offset"],
                                                self.local_timezone_offset)
-        self.added_cities = [self.current_city_frame]
         self.scroll_area_vlayout.addWidget(self.current_city_frame)
 
         spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum,
@@ -110,8 +109,9 @@ class Ui_MainWindow(object):
                                              hourly_list=self.current_city_data["hourly"],
                                              current_city_time_offset=self.current_city_data["timezone_offset"],
                                              local_time_offset=self.local_timezone_offset,
-                                             completer=self.completer)
+                                             completer=self.completer, is_added=True)
         self.city_pages_list = [self.current_city_page]
+        self.added_cities = [self.current_city_frame]
         self.stacked_widget.addWidget(self.current_city_page)
 
         self.main_widget_vlayout.addWidget(self.stacked_widget)
@@ -120,12 +120,11 @@ class Ui_MainWindow(object):
         self.current_city_page.slider_btn.released.connect(self.current_city_page.slider_btn.icon_anim.start)
         self.retranslateUi(MainWindow)
         self.stacked_widget.setCurrentIndex(0)
-        self.active = 0
 
         #self.current_city_frame.temp_btn.clicked.connect(self.changePage)
         self.current_city_frame.temp_btn.clicked.connect(self.current_city_frame.animButton)
-        self.current_city_page.completer.activated.connect(
-            lambda: self.createPage(self.current_city_page.weather_line_edit.text()))
+        self.completer.activated.connect(
+            lambda: self.createPage(self.city_pages_list[self.stacked_widget.currentIndex()].weather_line_edit.text()))
         self.current_city_page.slider_btn.clicked.connect(self.sliderAnimation)
 
     def retranslateUi(self, MainWindow):
@@ -179,7 +178,12 @@ class Ui_MainWindow(object):
         self.animation_page.start()
         self.city_pages_list[index].slider_btn.clicked.connect(self.sliderAnimation)
 
+        if not self.city_pages_list[-2].getAdd():
+            self.stacked_widget.removeWidget(self.city_pages_list[-2])
+            del self.city_pages_list[-2]
+
     def createPage(self, city_country):
+        print(city_country)
         city_name, country_name = city_country.split(", ")
         for city in self.cities_list:
             if city["name"] == city_name and city["country"] == country_name:
@@ -191,10 +195,9 @@ class Ui_MainWindow(object):
                                 hourly_list=weather_data["hourly"],
                                 current_city_time_offset=weather_data["timezone_offset"],
                                 local_time_offset=self.local_timezone_offset,
-                                completer=self.completer))
+                                completer=self.completer,
+                                is_added=False))
                 self.stacked_widget.addWidget(self.city_pages_list[-1])
-                self.active = len(self.city_pages_list) - 1
-                print(self.active)
                 self.changePage(self.city_pages_list[-1], len(self.city_pages_list) - 1)
 
                 break

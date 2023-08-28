@@ -9,8 +9,10 @@ from setupUi import CustomButton
 
 class WeatherPage(QWidget):
     def __init__(self, city_name: str, cur_temp: int, weather: str, max_temp: int, min_temp: int, hourly_list: list,
-                 current_city_time_offset: int, local_time_offset: int, completer):
+                 current_city_time_offset: int, local_time_offset: int, completer, is_added: bool):
         super().__init__()
+
+        self._is_added = is_added
 
         self.main_vlayout = QVBoxLayout(self)
         self.main_vlayout.setContentsMargins(0, 0, 0, 0)
@@ -22,13 +24,20 @@ class WeatherPage(QWidget):
 
         self.upper_page_hlayout = QHBoxLayout(self.upper_page_widget)
         self.upper_page_hlayout.setContentsMargins(15, 0, 20, 0)
-        self.upper_page_hlayout.setSpacing(0)
+        self.upper_page_hlayout.setSpacing(10)
 
-        self.slider_btn = CustomButton(self.upper_page_widget)
+        self.slider_btn = CustomButton(self.upper_page_widget, 50, 50, 45, 45,
+                                       "slider_icon.svg")
         self.upper_page_hlayout.addWidget(self.slider_btn, 0, Qt.AlignBottom)
 
         spacerItem1 = QSpacerItem(40, 20, QSizePolicy.MinimumExpanding, QSizePolicy.Minimum)
         self.upper_page_hlayout.addItem(spacerItem1)
+
+        if not self._is_added:
+            self.add_btn = CustomButton(self.upper_page_widget, 27, 27, 27, 27,
+                                       "add_icon.svg")
+            self.add_btn.setStyleSheet("border: 2px solid; border-radius: 3px")
+            self.upper_page_hlayout.addWidget(self.add_btn)
 
         self.weather_line_edit = QLineEdit(self.upper_page_widget)
         self.weather_line_edit.setMinimumSize(QSize(250, 0))
@@ -184,6 +193,11 @@ class WeatherPage(QWidget):
                                                                     current_city_time_offset,
                                                                     local_time_offset))
 
+    def getAdd(self):
+        return self._is_added
+
+    def setAdd(self, is_added: bool):
+        self._is_added = is_added
 
 
 class HourlyElement(QFrame):
