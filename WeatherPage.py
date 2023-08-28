@@ -49,6 +49,7 @@ class WeatherPage(QWidget):
         self.weather_line_edit.setCompleter(self.completer)
         self.upper_page_hlayout.addWidget(self.weather_line_edit)
         self.main_vlayout.addWidget(self.upper_page_widget)
+        print(self.weather_line_edit.height())
 
         self.main_page_widget = QWidget(self)
         sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
