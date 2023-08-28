@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QSizePolicy, QSp
 from PyQt5.QtCore import QSize, Qt, QRect
 from PyQt5.QtGui import QPixmap
 import datetime
+import sys
 from setupUi import setupRegularFont
 from setupUi import CustomButton
 
@@ -33,8 +34,12 @@ class WeatherPage(QWidget):
         spacerItem1 = QSpacerItem(40, 20, QSizePolicy.MinimumExpanding, QSizePolicy.Minimum)
         self.upper_page_hlayout.addItem(spacerItem1)
 
-        if not self._is_added:
-            self.add_btn = CustomButton(self.upper_page_widget, 27, 27, 27, 27,
+        if self._is_added:
+            if sys.platform == "darwin":
+                self.add_btn = CustomButton(self.upper_page_widget, 23, 23, 23, 23,
+                                            "add_icon.svg")
+            else:
+                self.add_btn = CustomButton(self.upper_page_widget, 27, 27, 27, 27,
                                        "add_icon.svg")
             self.add_btn.setStyleSheet("border: 2px solid; border-radius: 3px")
             self.upper_page_hlayout.addWidget(self.add_btn)
@@ -49,7 +54,6 @@ class WeatherPage(QWidget):
         self.weather_line_edit.setCompleter(self.completer)
         self.upper_page_hlayout.addWidget(self.weather_line_edit)
         self.main_vlayout.addWidget(self.upper_page_widget)
-        print(self.weather_line_edit.height())
 
         self.main_page_widget = QWidget(self)
         sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
