@@ -79,6 +79,7 @@ class Ui_MainWindow(object):
                                                self.current_city_data["icon"],
                                                self.current_city_data["timezone_offset"],
                                                self.local_timezone_offset)
+        self.added_cities = [self.current_city_frame]
         self.scroll_area_vlayout.addWidget(self.current_city_frame)
 
         spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum,
@@ -102,7 +103,6 @@ class Ui_MainWindow(object):
         self.stacked_widget.setObjectName("stacked_widget")
 
         self.cities_list = readCityList()
-        self.city_pages_list = []
         self.completer = setupQCompleter([f"{city['name']}, {city['country']}" for city in self.cities_list])
         self.current_city_page = WeatherPage(self.current_city_data["city"], self.current_city_data["cur_temp"],
                                              self.current_city_data["current_weather"], self.current_city_data["max"],
@@ -111,7 +111,7 @@ class Ui_MainWindow(object):
                                              current_city_time_offset=self.current_city_data["timezone_offset"],
                                              local_time_offset=self.local_timezone_offset,
                                              completer=self.completer)
-        self.city_pages_list.append(self.current_city_page)
+        self.city_pages_list = [self.current_city_page]
         self.stacked_widget.addWidget(self.current_city_page)
 
         self.main_widget_vlayout.addWidget(self.stacked_widget)
@@ -165,22 +165,16 @@ class Ui_MainWindow(object):
             self.is_expanded = True
 
     def changePage(self, page, index):
-        self.animation_cur_page = QtCore.QPropertyAnimation(self.stacked_widget.currentWidget(), b"geometry")
-        self.animation_cur_page.setDuration(1000)
-        self.animation_cur_page.setStartValue(QtCore.QRect(0, 0, self.stacked_widget.width(),
-                                                           self.stacked_widget.height()))
-        self.animation_cur_page.setEndValue(QtCore.QRect(0, 0, self.stacked_widget.width(),
-                                                         -self.stacked_widget.height()))
-        self.animation_cur_page.start()
-
-        self.animation_page = QtCore.QPropertyAnimation(page, b"geometry")
         self.stacked_widget.setCurrentIndex(index)
-        self.animation_page.setDuration(500)
+        self.animation_page = QtCore.QPropertyAnimation(page, b"geometry")
+        self.animation_page.setDuration(550)
+
         self.animation_page.setStartValue(
-            QtCore.QRect(0, -self.central_widget.height(), self.stacked_widget.width(),
-                         self.stacked_widget.height()))
+            QtCore.QRect(0, -self.central_widget.height(), self.stacked_widget.width(), self.stacked_widget.height()))
+
         self.animation_page.setEndValue(
             QtCore.QRect(0, 0, self.stacked_widget.width(), self.stacked_widget.height()))
+
         self.animation_page.setEasingCurve(QtCore.QEasingCurve.OutBack)
         self.animation_page.start()
         self.city_pages_list[index].slider_btn.clicked.connect(self.sliderAnimation)
@@ -200,6 +194,7 @@ class Ui_MainWindow(object):
                                 completer=self.completer))
                 self.stacked_widget.addWidget(self.city_pages_list[-1])
                 self.active = len(self.city_pages_list) - 1
+                print(self.active)
                 self.changePage(self.city_pages_list[-1], len(self.city_pages_list) - 1)
 
                 break

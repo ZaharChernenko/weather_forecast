@@ -15,6 +15,7 @@ def setupQCompleter(arr):
     completer.popup().setObjectName("completerPopup")
     completer.setMaxVisibleItems(15)
     completer.popup().setStyleSheet("color: white; background: transparent; border-radius: 5px; font-size: 14px;")
+    completer.popup().setStyleSheet("color: white; background: black; border-radius: 5px; font-size: 14px;")
     return completer
 
 

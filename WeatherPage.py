@@ -11,7 +11,6 @@ class WeatherPage(QWidget):
     def __init__(self, city_name: str, cur_temp: int, weather: str, max_temp: int, min_temp: int, hourly_list: list,
                  current_city_time_offset: int, local_time_offset: int, completer):
         super().__init__()
-        self.setObjectName("page")
 
         self.main_vlayout = QVBoxLayout(self)
         self.main_vlayout.setContentsMargins(0, 0, 0, 0)
@@ -44,9 +43,6 @@ class WeatherPage(QWidget):
 
         self.main_page_widget = QWidget(self)
         sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.main_page_widget.sizePolicy().hasHeightForWidth())
         self.main_page_widget.setSizePolicy(sizePolicy)
 
         self.main_page_vlayout = QVBoxLayout(self.main_page_widget)
@@ -55,9 +51,6 @@ class WeatherPage(QWidget):
 
         self.city_label = QLabel(self.main_page_widget)
         sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.city_label.sizePolicy().hasHeightForWidth())
         self.city_label.setSizePolicy(sizePolicy)
         self.city_label.setMinimumSize(QSize(0, 38))
         self.city_label.setMaximumSize(QSize(16777215, 38))
@@ -83,9 +76,6 @@ class WeatherPage(QWidget):
 
         self.max_min_temp_label = QLabel(self.main_page_widget)
         sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.max_min_temp_label.sizePolicy().hasHeightForWidth())
         self.max_min_temp_label.setSizePolicy(sizePolicy)
         self.max_min_temp_label.setMinimumSize(QSize(0, 18))
         self.max_min_temp_label.setMaximumSize(QSize(16777215, 18))
