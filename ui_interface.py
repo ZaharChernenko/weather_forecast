@@ -82,7 +82,7 @@ class Ui_MainWindow(object):
                                                max_temp=self.current_city_data["max"],
                                                min_temp=self.current_city_data["min"],
                                                icon_name=self.current_city_data["icon"])
-
+        self.current_city_frame.setFrameActive(True)
         self.scroll_area_vlayout.addWidget(self.current_city_frame)
         self.city_frames_list = [self.current_city_frame]
 
@@ -145,7 +145,7 @@ class Ui_MainWindow(object):
 
         self.current_city_frame.temp_btn.clicked.connect(lambda: self.changePage(self.current_city_page))
         self.current_city_page.slider_btn.clicked.connect(self.sliderAnimation)
-        self.current_city_frame.temp_btn.clicked.connect(self.current_city_frame.animButton)
+        self.current_city_frame.temp_btn.clicked.connect(self.current_city_frame.animActiveBtn)
         self.completer.activated.connect(
             lambda: self.createPageFromSearch(
                 self.city_pages_list[self.stacked_widget.currentIndex()].weather_line_edit.text()))
@@ -187,7 +187,16 @@ class Ui_MainWindow(object):
             self.is_expanded = True
 
     def changePage(self, page: WeatherPage):
+        prev_index = self.stacked_widget.currentIndex()
+        if self.city_pages_list[prev_index].getAdd():
+            self.city_frames_list[prev_index].setFrameActive(False)
+
         self.stacked_widget.setCurrentIndex(self.stacked_widget.indexOf(page))
+        if page.getAdd():
+            cur_index = self.stacked_widget.currentIndex()
+            self.city_frames_list[cur_index].setFrameActive(True)
+            if cur_index > 0:
+                self.city_frames_list[cur_index - 1].removeBorder()
         self.animation_page = QtCore.QPropertyAnimation(page, b"geometry")
         self.animation_page.setDuration(550)
 

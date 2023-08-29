@@ -4,7 +4,6 @@ from PyQt5.QtGui import QCursor, QIcon, QPixmap, QColor, QPalette
 from setupUi import setupRegularFont
 
 
-
 class WeatherFrame(QFrame):
     def __init__(self, parent, local_time_offset: int, current_city_time_offset: int,
                  city_name: str, temp: int, max_temp: int, min_temp: int, icon_name: str):
@@ -131,10 +130,10 @@ class WeatherFrame(QFrame):
         style_sheet_list = [s.strip() for s in style_sheet_string.split(';')]
         return style_sheet_list
 
-    def getBackColor(self):
+    def getBackgroundColor(self):
         return self.palette().color(self.current_background_color)
 
-    def setBackColor(self, color):
+    def setBackgroundColor(self, color):
         style_sheet_list = self.parseStyleSheet()
         bg_new = 'background-color: rgba(%d,%d,%d,%d)' % (color.red(), color.green(), color.blue(), color.alpha())
 
@@ -147,18 +146,32 @@ class WeatherFrame(QFrame):
 
         self.setStyleSheet('; '.join(style_sheet_list))
 
-    background = pyqtProperty(QColor, getBackColor, setBackColor)
+    background = pyqtProperty(QColor, getBackgroundColor, setBackgroundColor)
 
-    def changeBorderToActive(self):
+    def removeBorder(self):
         style_sheet_list = self.parseStyleSheet()
         for i, string in enumerate(style_sheet_list):
             if "border-bottom" in string:
                 style_sheet_list[i] = "#button_frame{border-radius: 10px;"
         self.setStyleSheet('; '.join(style_sheet_list))
 
-    def animButton(self):
+    def animActiveBtn(self):
         self.background_anim.start()
-        self.changeBorderToActive()
+        self.removeBorder()
+
+    def setFrameActive(self, is_active: bool):
+        if is_active:
+            self.animActiveBtn()
+            self.temp_btn.setDisabled(True)
+            self.city_btn.setDisabled(True)
+            self.time_btn.setDisabled(True)
+            self.weather_btn.setDisabled(True)
+        else:
+            self.setStyleSheet("#button_frame{border-bottom: 1px solid rgba(255, 255, 255, 0.5);}")
+            self.temp_btn.setEnabled(True)
+            self.city_btn.setEnabled(True)
+            self.time_btn.setEnabled(True)
+            self.weather_btn.setEnabled(True)
 
     def refreshTime(self):
         current_time = QTime.currentTime()
