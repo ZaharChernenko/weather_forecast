@@ -155,6 +155,8 @@ class WeatherFrame(QFrame):
                 style_sheet_list[i] = "#button_frame{border-radius: 10px;"
         self.setStyleSheet('; '.join(style_sheet_list))
 
+    def addBorder(self):
+        self.setStyleSheet("#button_frame{border-bottom: 1px solid rgba(255, 255, 255, 0.5);}")
     def animActiveBtn(self):
         self.background_anim.start()
         self.removeBorder()
@@ -167,7 +169,7 @@ class WeatherFrame(QFrame):
             self.time_btn.setDisabled(True)
             self.weather_btn.setDisabled(True)
         else:
-            self.setStyleSheet("#button_frame{border-bottom: 1px solid rgba(255, 255, 255, 0.5);}")
+            self.addBorder()
             self.temp_btn.setEnabled(True)
             self.city_btn.setEnabled(True)
             self.time_btn.setEnabled(True)

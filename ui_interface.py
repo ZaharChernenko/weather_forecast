@@ -186,25 +186,36 @@ class Ui_MainWindow(object):
             self.animation_compression_min.start()
             self.is_expanded = True
 
-    def changePage(self, page: WeatherPage):
+    def changePage(self, page: WeatherPage, is_from_search: bool = False):
         prev_index = self.stacked_widget.currentIndex()
         if self.city_pages_list[prev_index].getAdd():
             self.city_frames_list[prev_index].setFrameActive(False)
+            if prev_index > 0:
+                self.city_frames_list[prev_index - 1].addBorder()
 
         self.stacked_widget.setCurrentIndex(self.stacked_widget.indexOf(page))
+        cur_index = self.stacked_widget.currentIndex()
+
         if page.getAdd():
-            cur_index = self.stacked_widget.currentIndex()
             self.city_frames_list[cur_index].setFrameActive(True)
             if cur_index > 0:
                 self.city_frames_list[cur_index - 1].removeBorder()
+
         self.animation_page = QtCore.QPropertyAnimation(page, b"geometry")
         self.animation_page.setDuration(550)
+        if cur_index < prev_index or is_from_search:
+            self.animation_page.setStartValue(
+                QtCore.QRect(0, -self.central_widget.height(), self.stacked_widget.width(), self.stacked_widget.height()))
 
-        self.animation_page.setStartValue(
-            QtCore.QRect(0, -self.central_widget.height(), self.stacked_widget.width(), self.stacked_widget.height()))
+            self.animation_page.setEndValue(
+                QtCore.QRect(0, 0, self.stacked_widget.width(), self.stacked_widget.height()))
+        else:
+            self.animation_page.setStartValue(
+                QtCore.QRect(0, self.central_widget.height(), self.stacked_widget.width(),
+                             self.stacked_widget.height()))
 
-        self.animation_page.setEndValue(
-            QtCore.QRect(0, 0, self.stacked_widget.width(), self.stacked_widget.height()))
+            self.animation_page.setEndValue(
+                QtCore.QRect(0, 0, self.stacked_widget.width(), self.stacked_widget.height()))
 
         self.animation_page.setEasingCurve(QtCore.QEasingCurve.OutBack)
         self.animation_page.start()
@@ -244,12 +255,13 @@ class Ui_MainWindow(object):
         """create page from completer search"""
         print(city_country)
         city_name, country_name = city_country.split(", ")
+        self.city_pages_list[self.stacked_widget.currentIndex()].weather_line_edit.setText("")
         for city in self.cities_list:
             if city["name"] == city_name and city["country"] == country_name:
                 self.createPage(city_name, city["coord"]["lat"], city["coord"]["lon"],
                                 getWeatherData(city["coord"]["lat"], city["coord"]["lon"]), False)
 
-                self.changePage(self.city_pages_list[-1])
+                self.changePage(self.city_pages_list[-1], True)
                 break
 
     def addCity(self, page: WeatherPage):
@@ -265,6 +277,8 @@ class Ui_MainWindow(object):
 
         self.scroll_area_vlayout.removeItem(self.spacerItem)
         self.createWeatherFrame(page)
+        self.city_frames_list[-2].removeBorder()
+        self.city_frames_list[-1].setFrameActive(True)
         self.scroll_area_vlayout.addItem(self.spacerItem)
 
     def deleteCity(self, page: WeatherPage):
