@@ -86,9 +86,7 @@ class Ui_MainWindow(object):
         self.scroll_area_vlayout.addWidget(self.current_city_frame)
         self.city_frames_list = [self.current_city_frame]
 
-        self.spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum,
-                                                QtWidgets.QSizePolicy.MinimumExpanding)
-        self.scroll_area_vlayout.addItem(self.spacerItem)
+
         self.scroll_area.setWidget(self.scroll_area_widget)
         self.slider_vlayout.addWidget(self.scroll_area)
         self.main_hlayout.addWidget(self.slider)
@@ -138,20 +136,18 @@ class Ui_MainWindow(object):
                 for city in self.added_cities_list:
                     self.createPage(city["name"], city["coord"]["lat"], city["coord"]["lon"],
                                     getWeatherData(city["coord"]["lat"], city["coord"]["lon"]), True)
-                    self.city_frames_list.append(WeatherFrame(self.scroll_area_widget, self.local_timezone_offset,
-                                                              *self.city_pages_list[-1].getDataToWeatherFrame()))
-                    self.scroll_area_vlayout.removeItem(self.spacerItem)
-                    self.scroll_area_vlayout.addWidget(self.city_frames_list[-1])
-                    self.scroll_area_vlayout.addItem(self.spacerItem)
+                    self.createWeatherFrame(self.city_pages_list[-1])
 
-        for i in range(len(self.city_frames_list)):
-            self.city_frames_list[i].temp_btn.released.connect(lambda x=i: self.changePage(self.city_pages_list[x], x))
-        # self.current_city_frame.temp_btn.clicked.connect(self.changePage)
+        self.spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum,
+                                                QtWidgets.QSizePolicy.MinimumExpanding)
+        self.scroll_area_vlayout.addItem(self.spacerItem)
+
+        self.current_city_frame.temp_btn.clicked.connect(lambda: self.changePage(self.current_city_page))
+        self.current_city_page.slider_btn.clicked.connect(self.sliderAnimation)
         self.current_city_frame.temp_btn.clicked.connect(self.current_city_frame.animButton)
         self.completer.activated.connect(
             lambda: self.createPageFromSearch(
                 self.city_pages_list[self.stacked_widget.currentIndex()].weather_line_edit.text()))
-        self.current_city_page.slider_btn.clicked.connect(self.sliderAnimation)
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle("Прогноз погоды")
@@ -189,8 +185,8 @@ class Ui_MainWindow(object):
             self.animation_compression_min.start()
             self.is_expanded = True
 
-    def changePage(self, page: WeatherPage, index: int):
-        self.stacked_widget.setCurrentIndex(index)
+    def changePage(self, page: WeatherPage):
+        self.stacked_widget.setCurrentIndex(self.stacked_widget.indexOf(page))
         self.animation_page = QtCore.QPropertyAnimation(page, b"geometry")
         self.animation_page.setDuration(550)
 
@@ -202,28 +198,34 @@ class Ui_MainWindow(object):
 
         self.animation_page.setEasingCurve(QtCore.QEasingCurve.OutBack)
         self.animation_page.start()
-        self.city_pages_list[index].slider_btn.clicked.connect(self.sliderAnimation)
-        if not self.city_pages_list[index].getAdd():
-            self.city_pages_list[index].add_btn.clicked.connect(lambda: self.addCity(self.city_pages_list[index]))
+
         if not self.city_pages_list[-2].getAdd():
             self.stacked_widget.removeWidget(self.city_pages_list[-2])
             del self.city_pages_list[-2]
 
     def createPage(self, city_name: str, lat: int, lon: int, weather_data: dict, is_added: bool):
-        self.city_pages_list.append(
-            WeatherPage(city_name, lat, lon,
-                        weather_data["cur_temp"],
-                        weather=weather_data["current_weather"],
-                        icon_name=weather_data["icon"],
-                        max_temp=weather_data["max"],
-                        min_temp=weather_data["min"],
-                        hourly_list=weather_data["hourly"],
-                        current_city_time_offset=weather_data["timezone_offset"],
-                        local_time_offset=self.local_timezone_offset,
-                        completer=self.completer,
-                        is_added=is_added))
-
+        page = WeatherPage(city_name, lat, lon,
+                           weather_data["cur_temp"],
+                           weather=weather_data["current_weather"],
+                           icon_name=weather_data["icon"],
+                           max_temp=weather_data["max"],
+                           min_temp=weather_data["min"],
+                           hourly_list=weather_data["hourly"],
+                           current_city_time_offset=weather_data["timezone_offset"],
+                           local_time_offset=self.local_timezone_offset,
+                           completer=self.completer,
+                           is_added=is_added)
+        self.city_pages_list.append(page)
         self.stacked_widget.addWidget(self.city_pages_list[-1])
+        page.slider_btn.clicked.connect(self.sliderAnimation)
+        if not is_added:
+            page.add_btn.clicked.connect(lambda: self.addCity(page))
+
+    def createWeatherFrame(self, page: WeatherPage):
+        frame = WeatherFrame(self.scroll_area_widget, self.local_timezone_offset, *page.getDataToWeatherFrame())
+        self.city_frames_list.append(frame)
+        frame.temp_btn.clicked.connect(lambda: self.changePage(page))
+        self.scroll_area_vlayout.addWidget(frame)
 
     def createPageFromSearch(self, city_country: str):
         """create page from completer search"""
@@ -234,7 +236,7 @@ class Ui_MainWindow(object):
                 self.createPage(city_name, city["coord"]["lat"], city["coord"]["lon"],
                                 getWeatherData(city["coord"]["lat"], city["coord"]["lon"]), False)
 
-                self.changePage(self.city_pages_list[-1], len(self.city_pages_list) - 1)
+                self.changePage(self.city_pages_list[-1])
                 break
 
     def addCity(self, page: WeatherPage):
@@ -245,9 +247,9 @@ class Ui_MainWindow(object):
         with open("data/user_data.json", "w", encoding="UTF-8") as fout:
             dump(self.added_cities_list, fout, ensure_ascii=False, indent="\t")
 
-        self.city_frames_list.append(WeatherFrame(self.scroll_area_widget, self.local_timezone_offset,
-                                                  *page.getDataToWeatherFrame()))
-
         self.scroll_area_vlayout.removeItem(self.spacerItem)
-        self.scroll_area_vlayout.addWidget(self.city_frames_list[-1])
+        self.createWeatherFrame(page)
         self.scroll_area_vlayout.addItem(self.spacerItem)
+        cur_page_index = len(self.city_frames_list) - 1
+        #self.city_frames_list[cur_page_index].temp_btn.clicked.connect(
+            #lambda: self.changePage(self.city_pages_list[cur_page_index]))
