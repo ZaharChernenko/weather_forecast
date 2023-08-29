@@ -11,10 +11,12 @@ from setupUi import CustomButton
 class WeatherPage(QWidget):
     def __init__(self, city_name: str, city_lat: float, city_lon: float,
                  cur_temp: int, weather: str, icon_name: str, max_temp: int, min_temp: int, hourly_list: list,
-                 current_city_time_offset: int, local_time_offset: int, completer, is_added: bool):
+                 current_city_time_offset: int, local_time_offset: int, completer,
+                 is_added: bool, is_local_city: bool = False):
         super().__init__()
 
         self._is_added = is_added
+        self._is_local_city = is_local_city
 
         self._city_name = city_name
         self._cur_temp = cur_temp
@@ -54,6 +56,16 @@ class WeatherPage(QWidget):
                                             "add_icon.svg")
             self.add_btn.setStyleSheet("border: 2px solid; border-radius: 3px")
             self.upper_page_hlayout.addWidget(self.add_btn)
+        else:
+            if not self._is_local_city:
+                if sys.platform == "darwin":
+                    self.delete_btn = CustomButton(self.upper_page_widget, 23, 23, 23, 23,
+                                                   "delete_icon.svg")
+                else:
+                    self.delete_btn = CustomButton(self.upper_page_widget, 27, 27, 27, 27,
+                                                   "delete_icon.svg")
+                self.delete_btn.setStyleSheet("border: 2px solid; border-radius: 3px")
+                self.upper_page_hlayout.addWidget(self.delete_btn)
 
         self.weather_line_edit = QLineEdit(self.upper_page_widget)
         self.weather_line_edit.setMinimumSize(QSize(250, 0))
@@ -215,12 +227,26 @@ class WeatherPage(QWidget):
     def setAdd(self, is_added: bool):
         self._is_added = is_added
 
-    def getCityDict(self):
+    def getIsLocalCity(self):
+        return self._is_local_city
+
+    def getCityDict(self) -> dict:
         return {"name": self._city_name, "coord": {"lat": self._city_lat, "lon": self._city_lon}}
 
-    def getDataToWeatherFrame(self):
+    def getDataToWeatherFrame(self) -> tuple:
         return (self._current_city_time_offset, self._city_name, self._cur_temp, self._max_temp, self._min_temp,
                 self._icon_name)
+
+    def changeAddBtnToDeleteBtn(self):
+        self.add_btn.deleteLater()
+        if sys.platform == "darwin":
+            self.delete_btn = CustomButton(self.upper_page_widget, 23, 23, 23, 23,
+                                           "delete_icon.svg")
+        else:
+            self.delete_btn = CustomButton(self.upper_page_widget, 27, 27, 27, 27,
+                                           "delete_icon.svg")
+        self.delete_btn.setStyleSheet("border: 2px solid; border-radius: 3px")
+        self.upper_page_hlayout.insertWidget(2, self.delete_btn)
 
 
 class HourlyElement(QFrame):

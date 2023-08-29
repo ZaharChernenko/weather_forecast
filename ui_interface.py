@@ -117,7 +117,8 @@ class Ui_MainWindow(object):
                                              hourly_list=self.current_city_data["hourly"],
                                              current_city_time_offset=self.current_city_data["timezone_offset"],
                                              local_time_offset=self.local_timezone_offset,
-                                             completer=self.completer, is_added=True)
+                                             completer=self.completer,
+                                             is_added=True, is_local_city=True)
         self.stacked_widget.addWidget(self.current_city_page)
         self.city_pages_list = [self.current_city_page]
 
@@ -220,6 +221,9 @@ class Ui_MainWindow(object):
         page.slider_btn.clicked.connect(self.sliderAnimation)
         if not is_added:
             page.add_btn.clicked.connect(lambda: self.addCity(page))
+        else:
+            if not page.getIsLocalCity():
+                page.delete_btn.clicked.connect(lambda: self.deleteCity(page))
 
     def createWeatherFrame(self, page: WeatherPage):
         frame = WeatherFrame(self.scroll_area_widget, self.local_timezone_offset, *page.getDataToWeatherFrame())
@@ -242,6 +246,9 @@ class Ui_MainWindow(object):
     def addCity(self, page: WeatherPage):
         """overwrites user_data.json and create WeatherFrame object from page data"""
         page.setAdd(True)
+        page.changeAddBtnToDeleteBtn()
+        page.delete_btn.clicked.connect(lambda: self.deleteCity(page))
+
         city_dict = page.getCityDict()
         self.added_cities_list.append(city_dict)
         with open("data/user_data.json", "w", encoding="UTF-8") as fout:
@@ -250,6 +257,19 @@ class Ui_MainWindow(object):
         self.scroll_area_vlayout.removeItem(self.spacerItem)
         self.createWeatherFrame(page)
         self.scroll_area_vlayout.addItem(self.spacerItem)
-        cur_page_index = len(self.city_frames_list) - 1
-        #self.city_frames_list[cur_page_index].temp_btn.clicked.connect(
-            #lambda: self.changePage(self.city_pages_list[cur_page_index]))
+
+    def deleteCity(self, page: WeatherPage):
+        self.changePage(self.current_city_page)
+        page_coord = page.getCityDict()["coord"]
+        for i in range(len(self.added_cities_list)):
+            if (self.added_cities_list[i]["coord"]["lat"] == page_coord["lat"] and
+                    self.added_cities_list[i]["coord"]["lon"] == page_coord["lon"]):
+                self.city_frames_list[i + 1].deleteLater()
+                del self.city_frames_list[i + 1]
+
+        self.stacked_widget.removeWidget(page)
+        self.city_pages_list.remove(page)
+
+        self.added_cities_list.remove(page.getCityDict())
+        with open("data/user_data.json", "w", encoding="UTF-8") as fout:
+            dump(self.added_cities_list, fout, ensure_ascii=False, indent="\t")
