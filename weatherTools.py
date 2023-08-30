@@ -2,6 +2,7 @@ import geocoder
 import requests
 import gettext
 import json
+from PyQt5.QtWidgets import QMessageBox
 
 weather_translator = gettext.translation('weather', './locale', languages=['ru'])
 weather_translator.install()
@@ -30,10 +31,21 @@ def getWeatherData(lat, lon):
 def getWeatherDataAtCurrentPlace():
     g = geocoder.ip('me')
     print(g.city)
-    data_dict = getWeatherData(*g.latlng)
-    data_dict.update({"city": g.city})
-    data_dict.update({"coord": {
-        "lat": g.latlng[0],
-        "lon": g.latlng[1]
-    }})
-    return data_dict
+
+    if g.city is None:
+        error = QMessageBox()
+        error.setWindowTitle("Нет подключения к интернету")
+        error.setText("Проверьте подключение к интернету и перезапустите приложение")
+        error.setIcon(QMessageBox.Warning)
+        error.setStandardButtons(QMessageBox.Ok)
+        error.exec()
+        error.buttonClicked.connect(exit)
+
+    else:
+        data_dict = getWeatherData(*g.latlng)
+        data_dict.update({"city": g.city})
+        data_dict.update({"coord": {
+            "lat": g.latlng[0],
+            "lon": g.latlng[1]
+        }})
+        return data_dict

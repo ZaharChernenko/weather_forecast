@@ -10,33 +10,35 @@ import os
 
 
 class Ui_MainWindow(object):
-    def setupUi(self, MainWindow):
-        MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(811, 670)
-        MainWindow.setStyleSheet("*{\n"
-                                 "    border: none;\n"
-                                 "    background-color: transparent;\n"
-                                 "    background: transparent;\n"
-                                 "    padding: 0;\n"
-                                 "    margin: 0;\n"
-                                 "    color: #fff;\n"
-                                 "}\n"
-                                 "#central_widget{\n"
-                                 "    background-color: #1f232a;\n"
-                                 "}\n"
-                                 "\n"
-                                 "#slider{\n"
-                                 "    margin: 20 0 20 0;\n"
-                                 "    border-right: 1px solid rgba(255, 255, 255, 0.5);\n"
-                                 "}\n"
-                                 "\n"
-                                 "#weather_line_edit{\n"
-                                 "    border-radius: 3px;\n"
-                                 "    padding-left: 2px;\n"
-                                 "}"
-                                 )
-        self.central_widget = QtWidgets.QWidget(MainWindow)
+    def setupUi(self, main_window):
+        main_window.setObjectName("main_window")
+        main_window.resize(811, 670)
+
+        self.central_widget = QtWidgets.QWidget(main_window)
         self.central_widget.setObjectName("central_widget")
+
+        main_window.setStyleSheet("*{\n"
+                                  "    border: none;\n"
+                                  "    background-color: transparent;\n"
+                                  "    background: transparent;\n"
+                                  "    padding: 0;\n"
+                                  "    margin: 0;\n"
+                                  "    color: #fff;\n"
+                                  "}\n"
+                                  "#central_widget{\n"
+                                  "    background-color: #1f232a;\n"
+                                  "}\n"
+                                  "\n"
+                                  "#slider{\n"
+                                  "    margin: 20 0 20 0;\n"
+                                  "    border-right: 1px solid rgba(255, 255, 255, 0.5);\n"
+                                  "}\n"
+                                  "\n"
+                                  "#weather_line_edit{\n"
+                                  "    border-radius: 3px;\n"
+                                  "    padding-left: 2px;\n"
+                                  "}"
+                                  )
 
         self.main_hlayout = QtWidgets.QHBoxLayout(self.central_widget)
         self.main_hlayout.setContentsMargins(0, 0, 0, 0)
@@ -72,6 +74,7 @@ class Ui_MainWindow(object):
         self.scroll_area_vlayout.setObjectName("scroll_area_vlayout")
 
         self.local_timezone_offset = -time.timezone
+
         self.current_city_data = getWeatherDataAtCurrentPlace()
 
         self.current_city_frame = WeatherFrame(parent=self.scroll_area_widget,
@@ -85,7 +88,6 @@ class Ui_MainWindow(object):
         self.current_city_frame.setFrameActive(True)
         self.scroll_area_vlayout.addWidget(self.current_city_frame)
         self.city_frames_list = [self.current_city_frame]
-
 
         self.scroll_area.setWidget(self.scroll_area_widget)
         self.slider_vlayout.addWidget(self.scroll_area)
@@ -107,6 +109,7 @@ class Ui_MainWindow(object):
         self.cities_list = readCityList()
         self.completer = setupQCompleter([f"{city['name']}, {city['country']}" for city in self.cities_list])
         self.current_city_page = WeatherPage(self.current_city_data["city"],
+                                             "",
                                              self.current_city_data["coord"]["lat"],
                                              self.current_city_data["coord"]["lon"],
                                              cur_temp=self.current_city_data["cur_temp"],
@@ -124,9 +127,9 @@ class Ui_MainWindow(object):
 
         self.main_widget_vlayout.addWidget(self.stacked_widget)
         self.main_hlayout.addWidget(self.main_widget)
-        MainWindow.setCentralWidget(self.central_widget)
+        main_window.setCentralWidget(self.central_widget)
         self.current_city_page.slider_btn.released.connect(self.current_city_page.slider_btn.icon_anim.start)
-        self.retranslateUi(MainWindow)
+        self.retranslateUi(main_window)
         self.stacked_widget.setCurrentIndex(0)
 
         self.added_cities_list = []
@@ -135,7 +138,7 @@ class Ui_MainWindow(object):
             if user_data:
                 self.added_cities_list = loads(user_data)
                 for city in self.added_cities_list:
-                    self.createPage(city["name"], city["coord"]["lat"], city["coord"]["lon"],
+                    self.createPage(city["name"], city["country"], city["coord"]["lat"], city["coord"]["lon"],
                                     getWeatherData(city["coord"]["lat"], city["coord"]["lon"]), True)
                     self.createWeatherFrame(self.city_pages_list[-1])
 
@@ -205,7 +208,8 @@ class Ui_MainWindow(object):
         self.animation_page.setDuration(550)
         if cur_index < prev_index or is_from_search:
             self.animation_page.setStartValue(
-                QtCore.QRect(0, -self.central_widget.height(), self.stacked_widget.width(), self.stacked_widget.height()))
+                QtCore.QRect(0, -self.central_widget.height(), self.stacked_widget.width(),
+                             self.stacked_widget.height()))
 
             self.animation_page.setEndValue(
                 QtCore.QRect(0, 0, self.stacked_widget.width(), self.stacked_widget.height()))
@@ -224,8 +228,8 @@ class Ui_MainWindow(object):
             self.stacked_widget.removeWidget(self.city_pages_list[-2])
             del self.city_pages_list[-2]
 
-    def createPage(self, city_name: str, lat: int, lon: int, weather_data: dict, is_added: bool):
-        page = WeatherPage(city_name, lat, lon,
+    def createPage(self, city_name: str, country_name: str, lat: int, lon: int, weather_data: dict, is_added: bool):
+        page = WeatherPage(city_name, country_name, lat, lon,
                            weather_data["cur_temp"],
                            weather=weather_data["current_weather"],
                            icon_name=weather_data["icon"],
@@ -252,20 +256,25 @@ class Ui_MainWindow(object):
         self.scroll_area_vlayout.addWidget(frame)
 
     def createPageFromSearch(self, city_country: str):
-        """create page from completer search"""
+        """Create page from completer search"""
         print(city_country)
         city_name, country_name = city_country.split(", ")
         self.city_pages_list[self.stacked_widget.currentIndex()].weather_line_edit.setText("")
-        for city in self.cities_list:
-            if city["name"] == city_name and city["country"] == country_name:
-                self.createPage(city_name, city["coord"]["lat"], city["coord"]["lon"],
-                                getWeatherData(city["coord"]["lat"], city["coord"]["lon"]), False)
-
-                self.changePage(self.city_pages_list[-1], True)
+        for page in self.city_pages_list:
+            if city_name == page.getCity() and country_name == page.getCountry():
+                self.changePage(page)
                 break
+        else:
+            for city in self.cities_list:
+                if city["name"] == city_name and city["country"] == country_name:
+                    self.createPage(city_name, country_name, city["coord"]["lat"], city["coord"]["lon"],
+                                    getWeatherData(city["coord"]["lat"], city["coord"]["lon"]), False)
+
+                    self.changePage(self.city_pages_list[-1], True)
+                    break
 
     def addCity(self, page: WeatherPage):
-        """overwrites user_data.json and create WeatherFrame object from page data"""
+        """Overwrites user_data.json and create WeatherFrame object from page data"""
         page.setAdd(True)
         page.changeAddBtnToDeleteBtn()
         page.delete_btn.clicked.connect(lambda: self.deleteCity(page))

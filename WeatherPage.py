@@ -9,7 +9,7 @@ from setupUi import CustomButton
 
 
 class WeatherPage(QWidget):
-    def __init__(self, city_name: str, city_lat: float, city_lon: float,
+    def __init__(self, city_name: str, country_name: str, city_lat: float, city_lon: float,
                  cur_temp: int, weather: str, icon_name: str, max_temp: int, min_temp: int, hourly_list: list,
                  current_city_time_offset: int, local_time_offset: int, completer,
                  is_added: bool, is_local_city: bool = False):
@@ -19,14 +19,15 @@ class WeatherPage(QWidget):
         self._is_local_city = is_local_city
 
         self._city_name = city_name
+        self._country_name = country_name
+        self._city_lat = city_lat
+        self._city_lon = city_lon
+
         self._cur_temp = cur_temp
         self._max_temp = max_temp
         self._min_temp = min_temp
         self._icon_name = icon_name
         self._current_city_time_offset = current_city_time_offset
-
-        self._city_lat = city_lat
-        self._city_lon = city_lon
 
         self.main_vlayout = QVBoxLayout(self)
         self.main_vlayout.setContentsMargins(0, 0, 0, 0)
@@ -231,8 +232,16 @@ class WeatherPage(QWidget):
     def getIsLocalCity(self):
         return self._is_local_city
 
+    def getCity(self):
+        return self._city_name
+
+    def getCountry(self):
+        return self._country_name
+
     def getCityDict(self) -> dict:
-        return {"name": self._city_name, "coord": {"lat": self._city_lat, "lon": self._city_lon}}
+        """Returns all necessary data for user_data.json"""
+        return {"name": self._city_name, "country": self._country_name,
+                "coord": {"lat": self._city_lat, "lon": self._city_lon}}
 
     def getDataToWeatherFrame(self) -> tuple:
         return (self._current_city_time_offset, self._city_name, self._cur_temp, self._max_temp, self._min_temp,
