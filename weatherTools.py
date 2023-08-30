@@ -14,16 +14,18 @@ def createInternetWarningWindow():
             pass
         else:
             exit(1)
+
     error = QMessageBox()
     error.setWindowTitle("Нет подключения к интернету")
     error.setText("Проверьте подключение к интернету и нажмите Retry\nЕсли хотите закрыть приложение, нажмите Ok")
     error.setIcon(QMessageBox.Warning)
-    error.setStandardButtons(QMessageBox.Retry|QMessageBox.Ok)
+    error.setStandardButtons(QMessageBox.Retry | QMessageBox.Ok)
     error.setDefaultButton(QMessageBox.Retry)
     error.buttonClicked.connect(btnsWork)
     error.exec()
 
-def getWeatherData(lat, lon):
+
+def getWeatherData(lat: float, lon: float) -> dict:
     try:
         full_data = requests.get(f"https://openweathermap.org/data/2.5/onecall?lat={lat}&lon={lon}&units=metric&appid"
                                  f"=439d4b804bc8187953eb36d2a8c26a02").json()
@@ -48,7 +50,7 @@ def getWeatherData(lat, lon):
         return getWeatherData(lat, lon)
 
 
-def getWeatherDataAtCurrentPlace():
+def getWeatherDataAtCurrentPlace() -> dict:
     g = geocoder.ip('me')
     print(g.city)
 
@@ -56,11 +58,10 @@ def getWeatherDataAtCurrentPlace():
         createInternetWarningWindow()
         return getWeatherDataAtCurrentPlace()
 
-    else:
-        data_dict = getWeatherData(*g.latlng)
-        data_dict.update({"city": g.city})
-        data_dict.update({"coord": {
-            "lat": g.latlng[0],
-            "lon": g.latlng[1]
-        }})
-        return data_dict
+    data_dict = getWeatherData(*g.latlng)
+    data_dict.update({"city": g.city})
+    data_dict.update({"coord": {
+        "lat": g.latlng[0],
+        "lon": g.latlng[1]
+    }})
+    return data_dict

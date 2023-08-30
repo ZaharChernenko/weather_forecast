@@ -55,7 +55,7 @@ class WeatherPage(QWidget):
             else:
                 self.add_btn = CustomButton(self.upper_page_widget, 27, 27, 27, 27,
                                             "add_icon.svg")
-            self.add_btn.setStyleSheet("border: 2px solid; border-radius: 3px")
+            self.add_btn.setStyleSheet("border: 2px solid #7f7f7f; border-radius: 3px")
             self.upper_page_hlayout.addWidget(self.add_btn)
         else:
             if not self._is_local_city:
@@ -65,7 +65,7 @@ class WeatherPage(QWidget):
                 else:
                     self.delete_btn = CustomButton(self.upper_page_widget, 27, 27, 27, 27,
                                                    "delete_icon.svg")
-                self.delete_btn.setStyleSheet("border: 2px solid; border-radius: 3px")
+                self.delete_btn.setStyleSheet("border: 2px solid #7f7f7f; border-radius: 3px")
                 self.upper_page_hlayout.addWidget(self.delete_btn)
 
         self.weather_line_edit = QLineEdit(self.upper_page_widget)
@@ -146,7 +146,7 @@ class WeatherPage(QWidget):
         self.hourly_widget.setMaximumSize(QSize(16777215, 145))
         self.hourly_widget.setObjectName("hourly_widget")
         self.hourly_widget.setStyleSheet("#hourly_widget{\n"
-                                         "    background: rgba(255, 255, 255, 64);\n"
+                                         "    background: rgba(96, 96, 96, 128);\n"
                                          "    border-radius: 10px;\n"
                                          "}")
 
@@ -237,6 +237,9 @@ class WeatherPage(QWidget):
 
     def getCountry(self):
         return self._country_name
+
+    def getIconName(self):
+        return self._icon_name
 
     def getCityDict(self) -> dict:
         """Returns all necessary data for user_data.json"""

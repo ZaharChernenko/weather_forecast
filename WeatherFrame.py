@@ -121,9 +121,9 @@ class WeatherFrame(QFrame):
 
         self.current_background_color = QPalette.Window
         self.background_anim = QPropertyAnimation(self, b"background")
-        self.background_anim.setStartValue(QColor(255, 255, 255, 0))
-        self.background_anim.setEndValue(QColor(255, 255, 255, 32))
-        self.background_anim.setDuration(200)
+        self.background_anim.setStartValue(QColor(96, 96, 96, 0))
+        self.background_anim.setEndValue(QColor(96, 96, 96, 128))
+        self.background_anim.setDuration(300)
 
     def parseStyleSheet(self):
         style_sheet_string = self.styleSheet()
@@ -134,17 +134,17 @@ class WeatherFrame(QFrame):
         return self.palette().color(self.current_background_color)
 
     def setBackgroundColor(self, color):
-        style_sheet_list = self.parseStyleSheet()
+        stylesheet_list = self.parseStyleSheet()
         bg_new = 'background-color: rgba(%d,%d,%d,%d)' % (color.red(), color.green(), color.blue(), color.alpha())
 
-        for i, string in enumerate(style_sheet_list):
+        for i, string in enumerate(stylesheet_list):
             if 'background-color' in string:
-                style_sheet_list[i] = bg_new
+                stylesheet_list[i] = bg_new
                 break
         else:
-            style_sheet_list.insert(-1, bg_new)
+            stylesheet_list.insert(-1, bg_new)
 
-        self.setStyleSheet('; '.join(style_sheet_list))
+        self.setStyleSheet('; '.join(stylesheet_list))
 
     background = pyqtProperty(QColor, getBackgroundColor, setBackgroundColor)
 

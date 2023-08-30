@@ -1,5 +1,5 @@
 from setupUi import setupQCompleter
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore, QtWidgets, QtGui
 from WeatherFrame import WeatherFrame
 from weatherTools import getWeatherDataAtCurrentPlace, getWeatherData
 from filesTools import loadUserData, readCityList
@@ -7,16 +7,13 @@ from json import loads, dump
 from WeatherPage import WeatherPage
 import time
 import os
+import re
 
 
 class Ui_MainWindow(object):
     def setupUi(self, main_window):
         main_window.setObjectName("main_window")
         main_window.resize(811, 670)
-
-        self.central_widget = QtWidgets.QWidget(main_window)
-        self.central_widget.setObjectName("central_widget")
-
         main_window.setStyleSheet("*{\n"
                                   "    border: none;\n"
                                   "    background-color: transparent;\n"
@@ -27,6 +24,7 @@ class Ui_MainWindow(object):
                                   "}\n"
                                   "#central_widget{\n"
                                   "    background-color: #1f232a;\n"
+                                  "    border-image: url(img/01d.jpg) 0 0 0 0 stretch stretch;\n"
                                   "}\n"
                                   "\n"
                                   "#slider{\n"
@@ -39,6 +37,9 @@ class Ui_MainWindow(object):
                                   "    padding-left: 2px;\n"
                                   "}"
                                   )
+
+        self.central_widget = QtWidgets.QWidget(main_window)
+        self.central_widget.setObjectName("central_widget")
 
         self.main_hlayout = QtWidgets.QHBoxLayout(self.central_widget)
         self.main_hlayout.setContentsMargins(0, 0, 0, 0)
@@ -124,6 +125,8 @@ class Ui_MainWindow(object):
                                              is_added=True, is_local_city=True)
         self.stacked_widget.addWidget(self.current_city_page)
         self.city_pages_list = [self.current_city_page]
+        self.central_widget.setStyleSheet("#central_widget{border-image: url(img/" +
+                                          self.current_city_page.getIconName() + ".jpg) 0 0 0 0 stretch stretch;}")
 
         self.main_widget_vlayout.addWidget(self.stacked_widget)
         self.main_hlayout.addWidget(self.main_widget)
@@ -189,7 +192,12 @@ class Ui_MainWindow(object):
             self.animation_compression_min.start()
             self.is_expanded = True
 
+    def setBackgroundImage(self, icon_name: str):
+        self.central_widget.setStyleSheet(re.sub(r"url\(img/\d{2}[d,n].jpg\)", f"url(img/{icon_name}.jpg)",
+                                              self.central_widget.styleSheet()))
+
     def changePage(self, page: WeatherPage, is_from_search: bool = False):
+        self.setBackgroundImage(page.getIconName())
         prev_index = self.stacked_widget.currentIndex()
         if self.city_pages_list[prev_index].getAdd():
             self.city_frames_list[prev_index].setFrameActive(False)
