@@ -10,7 +10,8 @@ weather_translator.install()
 def getWeatherData(lat, lon):
     full_data = requests.get(f"https://openweathermap.org/data/2.5/onecall?lat={lat}&lon={lon}&units=metric&appid"
                              f"=439d4b804bc8187953eb36d2a8c26a02").json()
-    with open("test.json", "w") as fout:
+
+    with open("test.json", "w", encoding="UTF-8") as fout:
         json.dump(full_data, fout, ensure_ascii=False, indent="\t")
     data_dict = {}
     data_dict["cur_temp"] = int(full_data["current"]["temp"])

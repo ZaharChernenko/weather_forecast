@@ -72,7 +72,7 @@ class WeatherPage(QWidget):
         self.weather_line_edit.setMaximumSize(QSize(350, 16777215))
         font = setupRegularFont(14)
         self.weather_line_edit.setFont(font)
-        self.weather_line_edit.setStyleSheet("border: 1px solid white; border-radius: 3px;")
+        self.weather_line_edit.setStyleSheet("border: 1px solid white; border-radius: 3px; padding-left:3px;")
         self.weather_line_edit.setPlaceholderText("Поиск:")
         self.completer = completer
         self.weather_line_edit.setCompleter(self.completer)
