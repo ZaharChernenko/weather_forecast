@@ -9,12 +9,18 @@ weather_translator.install()
 
 
 def createInternetWarningWindow():
+    def btnsWork(btn):
+        if btn.text() == "Retry":
+            pass
+        else:
+            exit(1)
     error = QMessageBox()
     error.setWindowTitle("Нет подключения к интернету")
-    error.setText("Проверьте подключение к интернету и перезапустите приложение")
+    error.setText("Проверьте подключение к интернету и нажмите Retry\nЕсли хотите закрыть приложение, нажмите Ok")
     error.setIcon(QMessageBox.Warning)
-    error.setStandardButtons(QMessageBox.Ok)
-    error.buttonClicked.connect(lambda : print(1))
+    error.setStandardButtons(QMessageBox.Retry|QMessageBox.Ok)
+    error.setDefaultButton(QMessageBox.Retry)
+    error.buttonClicked.connect(btnsWork)
     error.exec()
 
 def getWeatherData(lat, lon):
