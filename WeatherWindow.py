@@ -10,8 +10,8 @@ import os
 import re
 
 
-class Ui_MainWindow(object):
-    def setupUi(self, main_window):
+class WeatherWindow(object):
+    def __init__(self, main_window):
         main_window.setObjectName("main_window")
         main_window.resize(811, 670)
         main_window.setStyleSheet("*{\n"
@@ -154,7 +154,8 @@ class Ui_MainWindow(object):
         self.current_city_frame.temp_btn.clicked.connect(lambda: self.changePage(self.current_city_page))
         self.current_city_frame.time_btn.clicked.connect(lambda: self.changePage(self.current_city_page))
         self.current_city_frame.weather_btn.clicked.connect(lambda: self.changePage(self.current_city_page))
-
+        self.current_city_page.timer.timeout.connect(lambda: self.current_city_frame.refreshData(
+                                                         *self.current_city_page.getDataToWeatherFrame()[2:]))
         self.current_city_page.slider_btn.clicked.connect(self.sliderAnimation)
 
         self.completer.activated.connect(
@@ -270,6 +271,7 @@ class Ui_MainWindow(object):
         frame.temp_btn.clicked.connect(lambda: self.changePage(page))
         frame.time_btn.clicked.connect(lambda: self.changePage(page))
         frame.weather_btn.clicked.connect(lambda: self.changePage(page))
+        page.timer.timeout.connect(lambda: frame.refreshData(*page.getDataToWeatherFrame()[2:]))
         self.scroll_area_vlayout.addWidget(frame)
 
     def createPageFromSearch(self, city_country: str):
@@ -322,3 +324,5 @@ class Ui_MainWindow(object):
         self.added_cities_list.remove(page.getCityDict())
         with open("data/user_data.json", "w", encoding="UTF-8") as fout:
             dump(self.added_cities_list, fout, ensure_ascii=False, indent="\t")
+
+        page.deleteLater()

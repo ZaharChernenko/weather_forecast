@@ -4,9 +4,6 @@ import gettext
 import json
 from PyQt5.QtWidgets import QMessageBox
 
-weather_translator = gettext.translation('weather', './locale', languages=['ru'])
-weather_translator.install()
-
 
 def createInternetWarningWindow():
     def btnsWork(btn):
@@ -26,6 +23,8 @@ def createInternetWarningWindow():
 
 
 def getWeatherData(lat: float, lon: float) -> dict:
+    weather_translator = gettext.translation('weather', './locale', languages=['ru'])
+    weather_translator.install()
     try:
         full_data = requests.get(f"https://openweathermap.org/data/2.5/onecall?lat={lat}&lon={lon}&units=metric&appid"
                                  f"=439d4b804bc8187953eb36d2a8c26a02").json()

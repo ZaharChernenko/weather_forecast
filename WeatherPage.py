@@ -1,11 +1,12 @@
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QSizePolicy, QSpacerItem, QLineEdit,
                              QLabel, QFrame, QScrollArea)
-from PyQt5.QtCore import QSize, Qt, QRect
+from PyQt5.QtCore import QSize, Qt, QRect, QTimer
 from PyQt5.QtGui import QPixmap
 import datetime
+import gettext
 import sys
-from setupUi import setupRegularFont
-from setupUi import CustomButton
+from setupUi import setupRegularFont, CustomButton
+from weatherTools import getWeatherData
 
 
 class WeatherPage(QWidget):
@@ -29,6 +30,7 @@ class WeatherPage(QWidget):
         self._min_temp = min_temp
         self._icon_name = icon_name
         self._current_city_time_offset = current_city_time_offset
+        self._local_time_offset = local_time_offset
 
         self.main_vlayout = QVBoxLayout(self)
         self.main_vlayout.setContentsMargins(0, 0, 0, 0)
@@ -271,15 +273,32 @@ class WeatherPage(QWidget):
         self.weather_label.setText(weather)
         self.max_min_temp_label.setText(f"Макс: {self._max_temp}°, мин: {self._min_temp}°")
         self.hourly_label.setText("Прогноз на 48 часов:")
+        self.createHourlyAndDailyWidgets(hourly_list, daily_list)
+
+        self.timer = QTimer()
+        self.timer.timeout.connect(lambda: self.refreshData(getWeatherData(self._city_lat, self._city_lon)))
+        self.timer.start(300000)
+
+    def deleteLater(self):
+        super().deleteLater()
+        self.timer.disconnect()  # python does not delete timer slot automatically and will try to call refreshData
+
+    def createHourlyAndDailyWidgets(self, hourly_list, daily_list):
+        self.list_of_hourly_elements = []
         for hour in hourly_list:
-            self.hourly_scroll_area_hlayout.addWidget(HourlyElement(self.hourly_scroll_area_widget, hour["dt"],
-                                                                    hour["icon"], hour["temp"],
-                                                                    self._current_city_time_offset,
-                                                                    local_time_offset))
+            hourly_element = HourlyElement(self.hourly_scroll_area_widget, hour["dt"],
+                                           hour["icon"], hour["temp"],
+                                           self._current_city_time_offset,
+                                           self._local_time_offset)
+            self.hourly_scroll_area_hlayout.addWidget(hourly_element)
+            self.list_of_hourly_elements.append(hourly_element)
+        self.list_of_daily_elements = []
         for day in daily_list:
-            self.daily_main_frame_vlayout.addWidget(DailyElement(self.daily_main_frame, day["dt"], day["icon"],
-                                                                 day["average_temp"], day["min_temp"], day["max_temp"],
-                                                                 self._current_city_time_offset, local_time_offset))
+            daily_element = DailyElement(self.daily_main_frame, day["dt"], day["icon"],
+                                         day["average_temp"], day["min_temp"], day["max_temp"],
+                                         self._current_city_time_offset, self._local_time_offset)
+            self.daily_main_frame_vlayout.addWidget(daily_element)
+            self.list_of_daily_elements.append(daily_element)
 
     def getAdd(self):
         return self._is_added
@@ -318,6 +337,21 @@ class WeatherPage(QWidget):
                                            "delete_icon.svg")
         self.delete_btn.setStyleSheet("border: 2px solid; border-radius: 3px")
         self.upper_page_hlayout.insertWidget(2, self.delete_btn)
+
+    def refreshData(self, weather_data: dict):
+        self._cur_temp = weather_data["cur_temp"]
+        self._max_temp = weather_data["max"]
+        self._min_temp = weather_data["min"]
+        self._icon_name = weather_data["icon"]
+
+        self.temp_label.setText(f"{self._cur_temp}°")
+        self.weather_label.setText(weather_data["current_weather"])
+        self.max_min_temp_label.setText(f"Макс: {self._max_temp}°, мин: {self._min_temp}°")
+        for hourly_element in self.list_of_hourly_elements:
+            hourly_element.deleteLater()
+        for daily_element in self.list_of_daily_elements:
+            daily_element.deleteLater()
+        self.createHourlyAndDailyWidgets(weather_data["hourly"], weather_data["daily"])
 
 
 class HourlyElement(QFrame):
@@ -372,6 +406,9 @@ class DailyElement(QFrame):
                  current_city_time_offset: int, local_time_offset: int):
         super().__init__(parent)
 
+        days_translator = gettext.translation('days_translate', './locale', languages=['ru'])
+        days_translator.install()
+
         self.setMinimumSize(QSize(0, 40))
         self.setMaximumSize(QSize(16777215, 40))
         self.setObjectName("daily_element")
@@ -397,7 +434,7 @@ class DailyElement(QFrame):
         self.daily_date_label.setMaximumSize(QSize(25, 16777215))
         self.daily_date_label.setFont(font)
         self.day = day + current_city_time_offset - local_time_offset
-        self.daily_date_label.setText(datetime.datetime.fromtimestamp(self.day).strftime("%a"))
+        self.daily_date_label.setText(_(datetime.datetime.fromtimestamp(self.day).strftime("%a")))
         self.horizontalLayout.addWidget(self.daily_date_label)
 
         self.weather_label = QLabel(self)

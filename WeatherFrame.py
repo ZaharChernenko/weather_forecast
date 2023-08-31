@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QFrame, QSizePolicy, QVBoxLayout, QHBoxLayout, QPushButton
-from PyQt5.QtCore import QSize, Qt, QPropertyAnimation, pyqtProperty, QEasingCurve, QTimer, QTime
+from PyQt5.QtCore import QSize, Qt, QPropertyAnimation, pyqtProperty, QTimer, QTime
 from PyQt5.QtGui import QCursor, QIcon, QPixmap, QColor, QPalette
 from setupUi import setupRegularFont
 
@@ -157,6 +157,7 @@ class WeatherFrame(QFrame):
 
     def addBorder(self):
         self.setStyleSheet("#button_frame{border-bottom: 1px solid rgba(255, 255, 255, 0.5);}")
+
     def animActiveBtn(self):
         self.background_anim.start()
         self.removeBorder()
@@ -179,3 +180,10 @@ class WeatherFrame(QFrame):
         current_time = QTime.currentTime()
         current_time = current_time.addSecs(self.current_city_time_offset - self.local_time_offset)
         self.time_btn.setText(current_time.toString("hh:mm"))
+
+    def refreshData(self, temp: int, max_temp: int, min_temp: int, icon_name: str):
+        self.temp_btn.setText(f"{temp}°")
+        self.weather_btn.setText(f"Макс: {max_temp}° | Мин: {min_temp}°")
+        icon = QIcon()
+        icon.addPixmap(QPixmap(f"icons/{icon_name}.png"), QIcon.Normal, QIcon.Off)
+        self.weather_btn.setIcon(icon)
