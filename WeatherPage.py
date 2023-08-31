@@ -10,7 +10,8 @@ from setupUi import CustomButton
 
 class WeatherPage(QWidget):
     def __init__(self, city_name: str, country_name: str, city_lat: float, city_lon: float,
-                 cur_temp: int, weather: str, icon_name: str, max_temp: int, min_temp: int, hourly_list: list,
+                 cur_temp: int, weather: str, icon_name: str, max_temp: int, min_temp: int,
+                 hourly_list: list, daily_list: list,
                  current_city_time_offset: int, local_time_offset: int, completer,
                  is_added: bool, is_local_city: bool = False):
         super().__init__()
@@ -127,6 +128,7 @@ class WeatherPage(QWidget):
 
         self.main_page_scroll_area = QScrollArea(self.main_page_widget)
         self.main_page_scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.main_page_scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.main_page_scroll_area.setWidgetResizable(True)
 
         self.main_page_scroll_widget = QWidget()
@@ -134,7 +136,7 @@ class WeatherPage(QWidget):
 
         self.main_page_scroll_vlayout = QVBoxLayout(self.main_page_scroll_widget)
         self.main_page_scroll_vlayout.setContentsMargins(0, 0, 0, 0)
-        self.main_page_scroll_vlayout.setSpacing(0)
+        self.main_page_scroll_vlayout.setSpacing(15)
 
         self.hourly_widget = QWidget(self.main_page_scroll_widget)
         sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -204,10 +206,62 @@ class WeatherPage(QWidget):
         self.hourly_vlayout.addWidget(self.hourly_scroll_area)
         self.main_page_scroll_vlayout.addWidget(self.hourly_widget)
 
-        self.widget = QWidget(self.main_page_scroll_widget)
-        self.widget.setMinimumSize(QSize(0, 1100))
-        self.widget.setObjectName("widget")
-        self.main_page_scroll_vlayout.addWidget(self.widget)
+        self.daily_widget = QWidget(self.main_page_scroll_widget)
+        self.daily_widget.setMinimumSize(QSize(350, 358))
+        self.daily_widget.setMaximumSize(QSize(16777215, 16777215))
+        self.daily_widget.setStyleSheet("#daily_widget{\n"
+                                        "    background: rgba(96, 96, 96, 128);\n"
+                                        "    border-radius: 10px;\n"
+                                        "}")
+        self.daily_widget.setObjectName("daily_widget")
+
+        self.daily_vlayout = QVBoxLayout(self.daily_widget)
+        self.daily_vlayout.setContentsMargins(6, 0, 0, 0)
+        self.daily_vlayout.setSpacing(0)
+        self.daily_vlayout.setObjectName("daily_vlayout")
+        self.daily_frame = QFrame(self.daily_widget)
+        self.daily_frame.setMinimumSize(QSize(0, 30))
+        self.daily_frame.setMaximumSize(QSize(16777215, 30))
+        self.daily_frame.setFrameShape(QFrame.StyledPanel)
+        self.daily_frame.setFrameShadow(QFrame.Raised)
+        self.daily_frame.setObjectName("daily_frame")
+
+        self.daily_frame_hlayout = QHBoxLayout(self.daily_frame)
+        self.daily_frame_hlayout.setContentsMargins(0, 0, 0, 0)
+        self.daily_frame_hlayout.setSpacing(7)
+        self.daily_frame_hlayout.setObjectName("daily_frame_hlayout")
+        self.label = QLabel(self.daily_frame)
+        self.label.setMinimumSize(QSize(15, 16))
+        self.label.setMaximumSize(QSize(15, 16))
+        self.label.setText("")
+        self.label.setPixmap(QPixmap("icons/calendar_icon.svg"))
+        self.label.setScaledContents(True)
+        self.label.setObjectName("label")
+        self.daily_frame_hlayout.addWidget(self.label)
+
+        self.label_2 = QLabel(self.daily_frame)
+        font.setPointSize(11)
+        self.label_2.setFont(font)
+        self.label_2.setStyleSheet("color: #d5d6d7;")
+        self.label_2.setObjectName("label_2")
+        self.label_2.setText("Прогноз на 8 дней:")
+        self.daily_frame_hlayout.addWidget(self.label_2)
+        self.daily_vlayout.addWidget(self.daily_frame)
+        self.daily_main_frame = QFrame(self.daily_widget)
+        self.daily_main_frame.setFrameShape(QFrame.StyledPanel)
+        self.daily_main_frame.setFrameShadow(QFrame.Raised)
+        self.daily_main_frame.setObjectName("daily_main_frame")
+
+        self.daily_main_frame_vlayout = QVBoxLayout(self.daily_main_frame)
+        self.daily_main_frame_vlayout.setContentsMargins(0, 0, 0, 0)
+        self.daily_main_frame_vlayout.setSpacing(0)
+        self.daily_main_frame_vlayout.setObjectName("daily_main_frame_vlayout")
+
+        self.daily_vlayout.addWidget(self.daily_main_frame)
+
+        self.main_page_scroll_vlayout.addWidget(self.daily_widget)
+        spacerItem3 = QSpacerItem(20, 15, QSizePolicy.Minimum, QSizePolicy.MinimumExpanding)
+        self.main_page_scroll_vlayout.addItem(spacerItem3)
         self.main_page_scroll_area.setWidget(self.main_page_scroll_widget)
         self.main_page_vlayout.addWidget(self.main_page_scroll_area)
         self.main_vlayout.addWidget(self.main_page_widget)
@@ -222,6 +276,10 @@ class WeatherPage(QWidget):
                                                                     hour["icon"], hour["temp"],
                                                                     self._current_city_time_offset,
                                                                     local_time_offset))
+        for day in daily_list:
+            self.daily_main_frame_vlayout.addWidget(DailyElement(self.daily_main_frame, day["dt"], day["icon"],
+                                                                 day["average_temp"], day["min_temp"], day["max_temp"],
+                                                                 self._current_city_time_offset, local_time_offset))
 
     def getAdd(self):
         return self._is_added
@@ -307,3 +365,50 @@ class HourlyElement(QFrame):
         self.hourly_temp_label.setText(f"{temp}°")
         self.time = time + current_city_time_offset - local_time_offset
         self.hourly_time_label.setText(datetime.datetime.fromtimestamp(self.time).strftime("%H"))
+
+
+class DailyElement(QFrame):
+    def __init__(self, parent, day: int, icon: str, average_temp: int, min_temp: int, max_temp: int,
+                 current_city_time_offset: int, local_time_offset: int):
+        super().__init__(parent)
+
+        self.setMinimumSize(QSize(0, 40))
+        self.setMaximumSize(QSize(16777215, 40))
+        self.setObjectName("daily_element")
+        self.setStyleSheet("#daily_element{\n"
+                           "    border-top: 1px solid #d5d6d7;\n"
+                           "}")
+        self.setFrameShape(QFrame.StyledPanel)
+        self.setFrameShadow(QFrame.Raised)
+
+        self.horizontalLayout = QHBoxLayout(self)
+        self.horizontalLayout.setContentsMargins(9, 0, 0, 0)
+        self.horizontalLayout.setSpacing(10)
+
+        font = setupRegularFont(14)
+
+        self.daily_date_label = QLabel(self)
+        sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.daily_date_label.sizePolicy().hasHeightForWidth())
+        self.daily_date_label.setSizePolicy(sizePolicy)
+        self.daily_date_label.setMinimumSize(QSize(25, 0))
+        self.daily_date_label.setMaximumSize(QSize(25, 16777215))
+        self.daily_date_label.setFont(font)
+        self.day = day + current_city_time_offset - local_time_offset
+        self.daily_date_label.setText(datetime.datetime.fromtimestamp(self.day).strftime("%a"))
+        self.horizontalLayout.addWidget(self.daily_date_label)
+
+        self.weather_label = QLabel(self)
+        self.weather_label.setMinimumSize(QSize(40, 40))
+        self.weather_label.setMaximumSize(QSize(40, 40))
+        self.weather_label.setPixmap(QPixmap(f"icons/{icon}.png"))
+        self.weather_label.setScaledContents(True)
+        self.horizontalLayout.addWidget(self.weather_label)
+
+        self.temp_label = QLabel(self)
+        font.setPointSize(13)
+        self.temp_label.setFont(font)
+        self.temp_label.setText(f"Средняя: {average_temp}° | Мин: {min_temp}° | Макс: {max_temp}°")
+        self.horizontalLayout.addWidget(self.temp_label)

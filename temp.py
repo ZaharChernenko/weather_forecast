@@ -523,7 +523,7 @@ class Ui_MainWindow(object):
         font = QtGui.QFont()
         font.setPointSize(13)
         self.temp_label_2.setFont(font)
-        self.temp_label_2.setObjectName("temp_label_2")
+        self.temp_label_2.setObjectName("temp_label")
         self.horizontalLayout.addWidget(self.temp_label_2)
         self.daily_main_frame_vlayout.addWidget(self.daily_element)
         self.daily_vlayout.addWidget(self.daily_main_frame)

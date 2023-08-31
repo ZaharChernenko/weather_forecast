@@ -119,6 +119,7 @@ class Ui_MainWindow(object):
                                              max_temp=self.current_city_data["max"],
                                              min_temp=self.current_city_data["min"],
                                              hourly_list=self.current_city_data["hourly"],
+                                             daily_list=self.current_city_data["daily"],
                                              current_city_time_offset=self.current_city_data["timezone_offset"],
                                              local_time_offset=self.local_timezone_offset,
                                              completer=self.completer,
@@ -149,9 +150,13 @@ class Ui_MainWindow(object):
                                                 QtWidgets.QSizePolicy.MinimumExpanding)
         self.scroll_area_vlayout.addItem(self.spacerItem)
 
+        self.current_city_frame.city_btn.clicked.connect(lambda: self.changePage(self.current_city_page))
         self.current_city_frame.temp_btn.clicked.connect(lambda: self.changePage(self.current_city_page))
+        self.current_city_frame.time_btn.clicked.connect(lambda: self.changePage(self.current_city_page))
+        self.current_city_frame.weather_btn.clicked.connect(lambda: self.changePage(self.current_city_page))
+
         self.current_city_page.slider_btn.clicked.connect(self.sliderAnimation)
-        self.current_city_frame.temp_btn.clicked.connect(self.current_city_frame.animActiveBtn)
+
         self.completer.activated.connect(
             lambda: self.createPageFromSearch(
                 self.city_pages_list[self.stacked_widget.currentIndex()].weather_line_edit.text()))
@@ -244,6 +249,7 @@ class Ui_MainWindow(object):
                            max_temp=weather_data["max"],
                            min_temp=weather_data["min"],
                            hourly_list=weather_data["hourly"],
+                           daily_list=weather_data["daily"],
                            current_city_time_offset=weather_data["timezone_offset"],
                            local_time_offset=self.local_timezone_offset,
                            completer=self.completer,
@@ -260,7 +266,10 @@ class Ui_MainWindow(object):
     def createWeatherFrame(self, page: WeatherPage):
         frame = WeatherFrame(self.scroll_area_widget, self.local_timezone_offset, *page.getDataToWeatherFrame())
         self.city_frames_list.append(frame)
+        frame.city_btn.clicked.connect(lambda: self.changePage(page))
         frame.temp_btn.clicked.connect(lambda: self.changePage(page))
+        frame.time_btn.clicked.connect(lambda: self.changePage(page))
+        frame.weather_btn.clicked.connect(lambda: self.changePage(page))
         self.scroll_area_vlayout.addWidget(frame)
 
     def createPageFromSearch(self, city_country: str):

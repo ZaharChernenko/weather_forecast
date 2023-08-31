@@ -43,6 +43,13 @@ def getWeatherData(lat: float, lon: float) -> dict:
         for i in range(len(data_dict["hourly"])):
             data_dict["hourly"][i] = {"dt": data_dict["hourly"][i]["dt"], "temp": int(data_dict["hourly"][i]["temp"]),
                                       "icon": data_dict["hourly"][i]["weather"][0]["icon"]}
+        data_dict["daily"] = full_data["daily"]
+        for j in range(len(data_dict["daily"])):
+            data_dict["daily"][j] = {"dt": data_dict["daily"][j]["dt"],
+                                     "icon": data_dict["daily"][j]["weather"][0]["icon"],
+                                     "average_temp": int(data_dict["daily"][j]["temp"]["day"]),
+                                     "min_temp": int(data_dict["daily"][j]["temp"]["min"]),
+                                     "max_temp": int(data_dict["daily"][j]["temp"]["max"])}
         return data_dict
 
     except requests.ConnectionError:
