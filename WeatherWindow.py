@@ -176,6 +176,8 @@ class WeatherWindow(object):
         self.timer.timeout.connect(self.refreshFramesTime)
         self.timer.start(10000)
 
+        self.icon_exp = re.compile(r"url\(img/\d{2}[d,n].jpg\)")
+
         self.current_city_frame.city_btn.clicked.connect(lambda: self.changePage(self.current_city_page))
         self.current_city_frame.temp_btn.clicked.connect(lambda: self.changePage(self.current_city_page))
         self.current_city_frame.time_btn.clicked.connect(lambda: self.changePage(self.current_city_page))
@@ -200,7 +202,7 @@ class WeatherWindow(object):
             self.is_expanded = True
 
     def setBackgroundImage(self, icon_name: str):
-        self.central_widget.setStyleSheet(re.sub(r"url\(img/\d{2}[d,n].jpg\)", f"url(img/{icon_name}.jpg)",
+        self.central_widget.setStyleSheet(self.icon_exp.sub(f"url(img/{icon_name}.jpg)",
                                                  self.central_widget.styleSheet()))
 
     def changePage(self, page: WeatherPage, is_from_search: bool = False):
