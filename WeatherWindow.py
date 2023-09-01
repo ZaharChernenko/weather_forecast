@@ -280,7 +280,11 @@ class WeatherWindow(object):
     def createPageFromSearch(self, city_country: str):
         """Create page from completer search"""
         city_name, country_name = city_country.split(", ")
-        self.city_pages_list[self.stacked_widget.currentIndex()].weather_line_edit.setText("")
+        current_page = self.city_pages_list[self.stacked_widget.currentIndex()]
+        current_page.weather_line_edit.setText("")
+        if city_name == current_page.getCity() and country_name == current_page.getCountry():
+            return
+
         for page in self.city_pages_list:
             if city_name == page.getCity() and country_name == page.getCountry():
                 self.changePage(page)

@@ -8,7 +8,6 @@ class WeatherFrame(QFrame):
     def __init__(self, parent, local_time_offset: int, current_city_time_offset: int,
                  city_name: str, temp: int, max_temp: int, min_temp: int, icon_name: str):
         super().__init__(parent)
-        self.city_name = city_name
         sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
