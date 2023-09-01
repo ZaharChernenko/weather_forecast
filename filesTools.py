@@ -10,7 +10,7 @@ def checkDirectory(path):
         print("Directory already exists")
 
 
-def loadUserData():
+def loadUserData() -> str:
     """Returns string"""
     with open("./data/user_data.json", "r", encoding="utf-8") as fin:
         file_check = fin.read().strip()

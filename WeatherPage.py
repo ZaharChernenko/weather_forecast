@@ -281,7 +281,10 @@ class WeatherPage(QWidget):
 
     def deleteLater(self):
         super().deleteLater()
-        self.timer.disconnect()  # python does not delete timer slot automatically and will try to call refreshData
+        self.timer.deleteLater()  # python does not delete timer automatically and will try to call refreshData
+
+    """def __del__(self):
+        print(self._city_name + " deleted")"""
 
     def createHourlyAndDailyWidgets(self, hourly_list, daily_list):
         self.list_of_hourly_elements = []

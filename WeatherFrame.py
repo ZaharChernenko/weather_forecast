@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QFrame, QSizePolicy, QVBoxLayout, QHBoxLayout, QPushButton
-from PyQt5.QtCore import QSize, Qt, QPropertyAnimation, pyqtProperty, QTimer, QTime
+from PyQt5.QtCore import QSize, Qt, QPropertyAnimation, pyqtProperty, QTime
 from PyQt5.QtGui import QCursor, QIcon, QPixmap, QColor, QPalette
 from setupUi import setupRegularFont
 
@@ -8,6 +8,7 @@ class WeatherFrame(QFrame):
     def __init__(self, parent, local_time_offset: int, current_city_time_offset: int,
                  city_name: str, temp: int, max_temp: int, min_temp: int, icon_name: str):
         super().__init__(parent)
+        self.city_name = city_name
         sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -110,20 +111,24 @@ class WeatherFrame(QFrame):
 
         self.current_city_time_offset = current_city_time_offset
         self.local_time_offset = local_time_offset
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.refreshTime)
-        self.timer.start(5000)
 
         self.city_btn.setText(city_name)
         self.temp_btn.setText(f"{temp}°")
         self.weather_btn.setText(f"Макс: {max_temp}° | Мин: {min_temp}°")
-        self.refreshTime()
+        self.setTime(QTime().currentTime())
 
         self.current_background_color = QPalette.Window
         self.background_anim = QPropertyAnimation(self, b"background")
         self.background_anim.setStartValue(QColor(96, 96, 96, 0))
         self.background_anim.setEndValue(QColor(96, 96, 96, 128))
         self.background_anim.setDuration(300)
+
+    def deleteLater(self):
+        super().deleteLater()
+        self.city_btn.deleteLater()
+        self.temp_btn.deleteLater()
+        self.time_btn.deleteLater()
+        self.weather_btn.deleteLater()
 
     def parseStyleSheet(self):
         style_sheet_string = self.styleSheet()
@@ -176,8 +181,8 @@ class WeatherFrame(QFrame):
             self.time_btn.setEnabled(True)
             self.weather_btn.setEnabled(True)
 
-    def refreshTime(self):
-        current_time = QTime.currentTime()
+    def setTime(self, time):
+        current_time = time
         current_time = current_time.addSecs(self.current_city_time_offset - self.local_time_offset)
         self.time_btn.setText(current_time.toString("hh:mm"))
 
