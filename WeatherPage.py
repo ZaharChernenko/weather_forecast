@@ -7,13 +7,12 @@ import gettext
 import sys
 from setupUi import setupRegularFont, CustomButton
 from weatherTools import getWeatherData
+from weatherTools import WeatherDataTuple
 
 
 class WeatherPage(QWidget):
     def __init__(self, city_name: str, country_name: str, city_lat: float, city_lon: float,
-                 cur_temp: int, weather: str, icon_name: str, max_temp: int, min_temp: int,
-                 hourly_list: list, daily_list: list,
-                 current_city_time_offset: int, local_time_offset: int, completer,
+                 weather_data: WeatherDataTuple, local_time_offset: int, completer,
                  is_added: bool, is_local_city: bool = False):
         super().__init__()
 
@@ -24,12 +23,12 @@ class WeatherPage(QWidget):
         self._country_name = country_name
         self._city_lat = city_lat
         self._city_lon = city_lon
+        self._current_city_time_offset = weather_data.timezone_offset
 
-        self._cur_temp = cur_temp
-        self._max_temp = max_temp
-        self._min_temp = min_temp
-        self._icon_name = icon_name
-        self._current_city_time_offset = current_city_time_offset
+        self._cur_temp = weather_data.cur_temp
+        self._max_temp = weather_data.max_temp
+        self._min_temp = weather_data.min_temp
+        self._icon_name = weather_data.icon
         self._local_time_offset = local_time_offset
 
         self.main_vlayout = QVBoxLayout(self)
@@ -270,10 +269,10 @@ class WeatherPage(QWidget):
 
         self.city_label.setText(self._city_name)
         self.temp_label.setText(f"{self._cur_temp}°")
-        self.weather_label.setText(weather)
+        self.weather_label.setText(weather_data.current_weather)
         self.max_min_temp_label.setText(f"Макс: {self._max_temp}°, мин: {self._min_temp}°")
         self.hourly_label.setText("Прогноз на 48 часов:")
-        self.createHourlyAndDailyWidgets(hourly_list, daily_list)
+        self.createHourlyAndDailyWidgets(weather_data.hourly, weather_data.daily)
 
         self.timer = QTimer()
         self.timer.timeout.connect(lambda: self.refreshData(getWeatherData(self._city_lat, self._city_lon)))
@@ -327,8 +326,8 @@ class WeatherPage(QWidget):
                 "coord": {"lat": self._city_lat, "lon": self._city_lon}}
 
     def getDataToWeatherFrame(self) -> tuple:
-        return (self._current_city_time_offset, self._city_name, self._cur_temp, self._max_temp, self._min_temp,
-                self._icon_name)
+        return (self._city_name, self._cur_temp, self._max_temp, self._min_temp,
+                self._icon_name, self._current_city_time_offset)
 
     def changeAddBtnToDeleteBtn(self):
         self.add_btn.deleteLater()
@@ -341,20 +340,20 @@ class WeatherPage(QWidget):
         self.delete_btn.setStyleSheet("border: 2px solid; border-radius: 3px")
         self.upper_page_hlayout.insertWidget(2, self.delete_btn)
 
-    def refreshData(self, weather_data: dict):
-        self._cur_temp = weather_data["cur_temp"]
-        self._max_temp = weather_data["max"]
-        self._min_temp = weather_data["min"]
-        self._icon_name = weather_data["icon"]
+    def refreshData(self, weather_data: WeatherDataTuple):
+        self._cur_temp = weather_data.cur_temp
+        self._max_temp = weather_data.max_temp
+        self._min_temp = weather_data.min_temp
+        self._icon_name = weather_data.icon
 
         self.temp_label.setText(f"{self._cur_temp}°")
-        self.weather_label.setText(weather_data["current_weather"])
+        self.weather_label.setText(weather_data.current_weather)
         self.max_min_temp_label.setText(f"Макс: {self._max_temp}°, мин: {self._min_temp}°")
         for hourly_element in self.list_of_hourly_elements:
             hourly_element.deleteLater()
         for daily_element in self.list_of_daily_elements:
             daily_element.deleteLater()
-        self.createHourlyAndDailyWidgets(weather_data["hourly"], weather_data["daily"])
+        self.createHourlyAndDailyWidgets(weather_data.hourly, weather_data.daily)
 
 
 class HourlyElement(QFrame):

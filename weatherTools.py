@@ -1,8 +1,13 @@
 import geocoder
 import requests
 import gettext
-import json
 from PyQt5.QtWidgets import QMessageBox
+from collections import namedtuple
+
+
+WeatherDataTuple = namedtuple("WeatherData", ["cur_temp", "max_temp", "min_temp",
+                                              "current_weather", "hourly", "daily",
+                                              "timezone_offset", "icon"])
 
 
 def createInternetWarningWindow():
@@ -22,49 +27,42 @@ def createInternetWarningWindow():
     error.exec()
 
 
-def getWeatherData(lat: float, lon: float) -> dict:
+def getWeatherData(lat: float, lon: float) -> WeatherDataTuple:
     weather_translator = gettext.translation('weather', './locale', languages=['ru'])
     weather_translator.install()
     try:
         full_data = requests.get(f"https://openweathermap.org/data/2.5/onecall?lat={lat}&lon={lon}&units=metric&appid"
                                  f"=439d4b804bc8187953eb36d2a8c26a02").json()
+        weather_data = WeatherDataTuple(cur_temp=int(full_data["current"]["temp"]),
+                                        max_temp=int(full_data["daily"][0]["temp"]["max"]),
+                                        min_temp=int(full_data["daily"][0]["temp"]["min"]),
+                                        current_weather=_(full_data["current"]["weather"][0]["description"]),
+                                        hourly=full_data["hourly"], daily=full_data["daily"],
+                                        icon=full_data["current"]["weather"][0]["icon"],
+                                        timezone_offset=full_data["timezone_offset"])
 
-        data_dict = {}
-        data_dict["cur_temp"] = int(full_data["current"]["temp"])
-        data_dict["max"] = int(full_data["daily"][0]["temp"]["max"])
-        data_dict["min"] = int(full_data["daily"][0]["temp"]["min"])
-        data_dict["icon"] = full_data["current"]["weather"][0]["icon"]
-        data_dict["current_weather"] = _(full_data["current"]["weather"][0]["description"])
-        data_dict["timezone_offset"] = full_data["timezone_offset"]
-        data_dict["hourly"] = full_data["hourly"]
-        for i in range(len(data_dict["hourly"])):
-            data_dict["hourly"][i] = {"dt": data_dict["hourly"][i]["dt"], "temp": int(data_dict["hourly"][i]["temp"]),
-                                      "icon": data_dict["hourly"][i]["weather"][0]["icon"]}
-        data_dict["daily"] = full_data["daily"]
-        for j in range(len(data_dict["daily"])):
-            data_dict["daily"][j] = {"dt": data_dict["daily"][j]["dt"],
-                                     "icon": data_dict["daily"][j]["weather"][0]["icon"],
-                                     "average_temp": int(data_dict["daily"][j]["temp"]["day"]),
-                                     "min_temp": int(data_dict["daily"][j]["temp"]["min"]),
-                                     "max_temp": int(data_dict["daily"][j]["temp"]["max"])}
-        return data_dict
+        for i in range(len(weather_data.hourly)):
+            weather_data.hourly[i] = {"dt": weather_data.hourly[i]["dt"], "temp": int(weather_data.hourly[i]["temp"]),
+                                      "icon": weather_data.hourly[i]["weather"][0]["icon"]}
+
+        for j in range(len(weather_data.daily)):
+            weather_data.daily[j] = {"dt": weather_data.daily[j]["dt"],
+                                     "icon": weather_data.daily[j]["weather"][0]["icon"],
+                                     "average_temp": int(weather_data.daily[j]["temp"]["day"]),
+                                     "min_temp": int(weather_data.daily[j]["temp"]["min"]),
+                                     "max_temp": int(weather_data.daily[j]["temp"]["max"])}
+        return weather_data
 
     except requests.ConnectionError:
         createInternetWarningWindow()
         return getWeatherData(lat, lon)
 
 
-def getWeatherDataAtCurrentPlace() -> dict:
-    g = geocoder.ip('me')
+def getCurrentLocation():
+    location = geocoder.ip('me')
 
-    if g.city is None:
+    if location.city is None:
         createInternetWarningWindow()
-        return getWeatherDataAtCurrentPlace()
+        return getCurrentLocation()
 
-    data_dict = getWeatherData(*g.latlng)
-    data_dict.update({"city": g.city})
-    data_dict.update({"coord": {
-        "lat": g.latlng[0],
-        "lon": g.latlng[1]
-    }})
-    return data_dict
+    return location

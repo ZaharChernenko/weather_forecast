@@ -2,7 +2,7 @@ from setupUi import setupQCompleter
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import QTimer, QTime
 from WeatherFrame import WeatherFrame
-from weatherTools import getWeatherDataAtCurrentPlace, getWeatherData
+from weatherTools import getCurrentLocation, getWeatherData, WeatherDataTuple
 from filesTools import loadUserData, readCityList
 from json import loads, dump
 from WeatherPage import WeatherPage
@@ -74,24 +74,9 @@ class WeatherWindow(object):
         self.scroll_area_vlayout.setSpacing(0)
 
         self.local_timezone_offset = -time.timezone
+        self.current_city_geo = getCurrentLocation()
+        self.current_city_data = getWeatherData(*self.current_city_geo.latlng)
 
-        self.current_city_data = getWeatherDataAtCurrentPlace()
-
-        self.current_city_frame = WeatherFrame(parent=self.scroll_area_widget,
-                                               local_time_offset=self.local_timezone_offset,
-                                               current_city_time_offset=self.current_city_data["timezone_offset"],
-                                               city_name="Текущее место",
-                                               temp=self.current_city_data["cur_temp"],
-                                               max_temp=self.current_city_data["max"],
-                                               min_temp=self.current_city_data["min"],
-                                               icon_name=self.current_city_data["icon"])
-        self.current_city_frame.setFrameActive(True)
-        self.scroll_area_vlayout.addWidget(self.current_city_frame)
-        self.city_frames_list = [self.current_city_frame]
-
-        self.scroll_area.setWidget(self.scroll_area_widget)
-        self.slider_vlayout.addWidget(self.scroll_area)
-        self.main_hlayout.addWidget(self.slider)
         self.main_widget = QtWidgets.QWidget(self.central_widget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
@@ -103,32 +88,39 @@ class WeatherWindow(object):
         self.main_widget_vlayout.setContentsMargins(0, 0, 0, 0)
         self.main_widget_vlayout.setSpacing(0)
         self.main_widget_vlayout.setObjectName("main_widget_vlayout")
+
         self.stacked_widget = QtWidgets.QStackedWidget(self.main_widget)
         self.stacked_widget.setObjectName("stacked_widget")
+        self.main_widget_vlayout.addWidget(self.stacked_widget)
 
         self.cities_list = readCityList()
         self.completer = setupQCompleter([f"{city['name']}, {city['country']}" for city in self.cities_list])
-        self.current_city_page = WeatherPage(self.current_city_data["city"],
+
+        self.current_city_page = WeatherPage(self.current_city_geo.city,
                                              "",
-                                             self.current_city_data["coord"]["lat"],
-                                             self.current_city_data["coord"]["lon"],
-                                             cur_temp=self.current_city_data["cur_temp"],
-                                             weather=self.current_city_data["current_weather"],
-                                             icon_name=self.current_city_data["icon"],
-                                             max_temp=self.current_city_data["max"],
-                                             min_temp=self.current_city_data["min"],
-                                             hourly_list=self.current_city_data["hourly"],
-                                             daily_list=self.current_city_data["daily"],
-                                             current_city_time_offset=self.current_city_data["timezone_offset"],
+                                             *self.current_city_geo.latlng,
+                                             weather_data=self.current_city_data,
                                              local_time_offset=self.local_timezone_offset,
                                              completer=self.completer,
                                              is_added=True, is_local_city=True)
         self.stacked_widget.addWidget(self.current_city_page)
+
         self.city_pages_list = [self.current_city_page]
         self.central_widget.setStyleSheet("#central_widget{border-image: url(img/" +
                                           self.current_city_page.getIconName() + ".jpg) 0 0 0 0 stretch stretch;}")
 
-        self.main_widget_vlayout.addWidget(self.stacked_widget)
+        self.current_city_frame = WeatherFrame(self.scroll_area_widget, "Текущее место",
+                                               *(self.current_city_page.getDataToWeatherFrame()[1:]),
+                                               local_time_offset=self.local_timezone_offset)
+
+        self.current_city_frame.setFrameActive(True)
+        self.scroll_area_vlayout.addWidget(self.current_city_frame)
+        self.city_frames_list = [self.current_city_frame]
+
+        self.scroll_area.setWidget(self.scroll_area_widget)
+        self.slider_vlayout.addWidget(self.scroll_area)
+        self.main_hlayout.addWidget(self.slider)
+
         self.main_hlayout.addWidget(self.main_widget)
         main_window.setCentralWidget(self.central_widget)
         main_window.setWindowTitle("Прогноз погоды")
@@ -183,7 +175,7 @@ class WeatherWindow(object):
         self.current_city_frame.time_btn.clicked.connect(lambda: self.changePage(self.current_city_page))
         self.current_city_frame.weather_btn.clicked.connect(lambda: self.changePage(self.current_city_page))
         self.current_city_page.timer.timeout.connect(lambda: self.current_city_frame.refreshData(
-            *self.current_city_page.getDataToWeatherFrame()[2:]))
+            *self.current_city_page.getDataToWeatherFrame()[1:5]))
         self.current_city_page.slider_btn.clicked.connect(self.sliderAnimation)
 
         self.completer.activated.connect(
@@ -203,7 +195,7 @@ class WeatherWindow(object):
 
     def setBackgroundImage(self, icon_name: str):
         self.central_widget.setStyleSheet(self.icon_exp.sub(f"url(img/{icon_name}.jpg)",
-                                                 self.central_widget.styleSheet()))
+                                                            self.central_widget.styleSheet()))
 
     def changePage(self, page: WeatherPage, is_from_search: bool = False):
         self.setBackgroundImage(page.getIconName())
@@ -245,16 +237,10 @@ class WeatherWindow(object):
         self.animation_page.setEasingCurve(QtCore.QEasingCurve.OutBack)
         self.animation_page.start()
 
-    def createPage(self, city_name: str, country_name: str, lat: int, lon: int, weather_data: dict, is_added: bool):
+    def createPage(self, city_name: str, country_name: str, lat: int, lon: int, weather_data: WeatherDataTuple,
+                   is_added: bool):
         page = WeatherPage(city_name, country_name, lat, lon,
-                           weather_data["cur_temp"],
-                           weather=weather_data["current_weather"],
-                           icon_name=weather_data["icon"],
-                           max_temp=weather_data["max"],
-                           min_temp=weather_data["min"],
-                           hourly_list=weather_data["hourly"],
-                           daily_list=weather_data["daily"],
-                           current_city_time_offset=weather_data["timezone_offset"],
+                           weather_data=weather_data,
                            local_time_offset=self.local_timezone_offset,
                            completer=self.completer,
                            is_added=is_added)
@@ -268,13 +254,13 @@ class WeatherWindow(object):
                 page.delete_btn.clicked.connect(lambda: self.deleteCity(page))
 
     def createWeatherFrame(self, page: WeatherPage):
-        frame = WeatherFrame(self.scroll_area_widget, self.local_timezone_offset, *page.getDataToWeatherFrame())
+        frame = WeatherFrame(self.scroll_area_widget, *page.getDataToWeatherFrame(), self.local_timezone_offset)
         self.city_frames_list.append(frame)
         frame.city_btn.clicked.connect(lambda: self.changePage(page))
         frame.temp_btn.clicked.connect(lambda: self.changePage(page))
         frame.time_btn.clicked.connect(lambda: self.changePage(page))
         frame.weather_btn.clicked.connect(lambda: self.changePage(page))
-        page.timer.timeout.connect(lambda: frame.refreshData(*page.getDataToWeatherFrame()[2:]))
+        page.timer.timeout.connect(lambda: frame.refreshData(*page.getDataToWeatherFrame()[1:5]))
         self.scroll_area_vlayout.addWidget(frame)
 
     def createPageFromSearch(self, city_country: str):
