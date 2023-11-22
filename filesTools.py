@@ -1,5 +1,4 @@
 import os
-import json
 import csv
 from collections import namedtuple
 
