@@ -1,5 +1,7 @@
 import bisect
-
+import time
+import os
+import re
 from setupUi import setupQCompleter
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import QTimer, QTime
@@ -8,12 +10,9 @@ from weatherTools import getCurrentLocation, getWeatherData, WeatherDataTuple
 from filesTools import loadUserData, readCityDict
 from json import loads, dump
 from WeatherPage import WeatherPage
-import time
-import os
-import re
 
 
-class WeatherWindow(object):
+class WeatherWindow:
     def __init__(self, main_window):
         main_window.setObjectName("main_window")
         main_window.resize(811, 670)
@@ -281,8 +280,9 @@ class WeatherWindow(object):
         else:
             index = bisect.bisect_left(self.cities_dict[country_name], city_name, key=lambda elem: elem.name)
             self.createPage(city_name, country_name,
-                    self.cities_dict[country_name][index].lat, self.cities_dict[country_name][index].lon,
-                    getWeatherData(self.cities_dict[country_name][index].lat, self.cities_dict[country_name][index].lon), False)
+                            self.cities_dict[country_name][index].lat, self.cities_dict[country_name][index].lon,
+                            getWeatherData(self.cities_dict[country_name][index].lat,
+                                           self.cities_dict[country_name][index].lon), False)
 
             self.changePage(self.city_pages_list[-1], True)
 
