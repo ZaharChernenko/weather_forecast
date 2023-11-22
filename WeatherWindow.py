@@ -1,9 +1,11 @@
+import bisect
+
 from setupUi import setupQCompleter
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import QTimer, QTime
 from WeatherFrame import WeatherFrame
 from weatherTools import getCurrentLocation, getWeatherData, WeatherDataTuple
-from filesTools import loadUserData, readCityList
+from filesTools import loadUserData, readCityDict
 from json import loads, dump
 from WeatherPage import WeatherPage
 import time
@@ -93,8 +95,9 @@ class WeatherWindow(object):
         self.stacked_widget.setObjectName("stacked_widget")
         self.main_widget_vlayout.addWidget(self.stacked_widget)
 
-        self.cities_list = readCityList()
-        self.completer = setupQCompleter([f"{city['name']}, {city['country']}" for city in self.cities_list])
+        self.cities_dict = readCityDict()
+        self.completer = setupQCompleter([f"{city_tuple.name}, {country}" for country in self.cities_dict
+                                          for city_tuple in self.cities_dict[country]])
 
         self.current_city_page = WeatherPage(self.current_city_geo.city,
                                              "",
@@ -276,13 +279,12 @@ class WeatherWindow(object):
                 self.changePage(page)
                 break
         else:
-            for city in self.cities_list:
-                if city["name"] == city_name and city["country"] == country_name:
-                    self.createPage(city_name, country_name, city["coord"]["lat"], city["coord"]["lon"],
-                                    getWeatherData(city["coord"]["lat"], city["coord"]["lon"]), False)
+            index = bisect.bisect_left(self.cities_dict[country_name], city_name, key=lambda elem: elem.name)
+            self.createPage(city_name, country_name,
+                    self.cities_dict[country_name][index].lat, self.cities_dict[country_name][index].lon,
+                    getWeatherData(self.cities_dict[country_name][index].lat, self.cities_dict[country_name][index].lon), False)
 
-                    self.changePage(self.city_pages_list[-1], True)
-                    break
+            self.changePage(self.city_pages_list[-1], True)
 
     def addCity(self, page: WeatherPage):
         """Overwrites user_data.json and create WeatherFrame object from page data"""

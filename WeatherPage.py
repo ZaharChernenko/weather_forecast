@@ -6,8 +6,7 @@ import datetime
 import gettext
 import sys
 from setupUi import setupRegularFont, CustomButton
-from weatherTools import getWeatherData
-from weatherTools import WeatherDataTuple
+from weatherTools import getWeatherData, WeatherDataTuple
 
 
 class WeatherPage(QWidget):

@@ -1,5 +1,7 @@
-import json
 import os
+import json
+import csv
+from collections import namedtuple
 
 
 def checkDirectory(path):
@@ -17,6 +19,15 @@ def loadUserData() -> str:
         return file_check
 
 
-def readCityList():
-    with open("./data/city_list.json", "r", encoding="UTF-8") as fin:
-        return json.load(fin)
+CityTuple = namedtuple("CityTuple", "name lat lon")
+
+
+def readCityDict() -> dict:
+    with open("./data/city_list.csv", "r", encoding="UTF-8") as fin:
+        csv_reader = csv.reader(fin)
+        next(csv_reader)
+        cities_dict = {}
+        for line in csv_reader:
+            cities_dict.setdefault(line[1], [])
+            cities_dict[line[1]].append(CityTuple(line[0], line[4], line[5]))
+        return cities_dict
