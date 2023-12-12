@@ -2,13 +2,14 @@ import bisect
 import time
 import os
 import re
+from json import loads, dump
 from setupUi import setupQCompleter
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import QTimer, QTime
 from WeatherFrame import WeatherFrame
-from weatherTools import getCurrentLocation, getWeatherData, WeatherDataTuple
+from weatherTools import getCurrentLocation, getWeatherData
 from filesTools import loadUserData, readCityDict
-from json import loads, dump
+from WeatherStructs import FullWeatherData
 from WeatherPage import WeatherPage
 
 
@@ -239,7 +240,7 @@ class WeatherWindow:
         self.animation_page.setEasingCurve(QtCore.QEasingCurve.OutBack)
         self.animation_page.start()
 
-    def createPage(self, city_name: str, country_name: str, lat: int, lon: int, weather_data: WeatherDataTuple,
+    def createPage(self, city_name: str, country_name: str, lat: int, lon: int, weather_data: FullWeatherData,
                    is_added: bool):
         page = WeatherPage(city_name, country_name, lat, lon,
                            weather_data=weather_data,
