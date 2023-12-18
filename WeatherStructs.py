@@ -1,28 +1,28 @@
 from typing import NamedTuple
 
 
-Celcius = int
+Celsius = int
 WeatherType = str
 
 
 class HourlyWeatherDataElem(NamedTuple):
     dt: int
-    temp: Celcius
+    temp: Celsius
     icon: str
 
 
 class DailyWeatherDataElem(NamedTuple):
     dt: int
-    average_temp: Celcius
-    max_temp: Celcius
-    min_temp: Celcius
+    average_temp: Celsius
+    max_temp: Celsius
+    min_temp: Celsius
     icon: str
 
 
 class FullWeatherData(NamedTuple):
-    cur_temp: Celcius
-    max_temp: Celcius
-    min_temp: Celcius
+    cur_temp: Celsius
+    max_temp: Celsius
+    min_temp: Celsius
     cur_weather: WeatherType
     hourly: list[HourlyWeatherDataElem]
     daily: list[DailyWeatherDataElem]

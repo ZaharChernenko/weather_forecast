@@ -2,40 +2,23 @@ import gettext
 import geocoder
 import requests
 from WeatherStructs import HourlyWeatherDataElem, DailyWeatherDataElem, FullWeatherData
-from PyQt5.QtWidgets import QMessageBox
-
-
-def createInternetWarningWindow():
-    def btnsWork(btn):
-        if btn.text() == "Retry":
-            pass
-        else:
-            exit(1)
-
-    error = QMessageBox()
-    error.setWindowTitle("Нет подключения к интернету")
-    error.setText("Проверьте подключение к интернету и нажмите Retry\nЕсли хотите закрыть приложение, нажмите Ok")
-    error.setIcon(QMessageBox.Warning)
-    error.setStandardButtons(QMessageBox.Retry | QMessageBox.Ok)
-    error.setDefaultButton(QMessageBox.Retry)
-    error.buttonClicked.connect(btnsWork)
-    error.exec()
+from exceptions import IpReceivingError
 
 
 def parseHourlyWeatherData(hourly_data):
     for i, hour in enumerate(hourly_data):
         hourly_data[i] = HourlyWeatherDataElem(dt=hour["dt"],
-                                                 temp=int(hour["temp"]),
-                                                 icon=hour["weather"][0]["icon"])
+                                               temp=int(hour["temp"]),
+                                               icon=hour["weather"][0]["icon"])
 
 
 def parseDailyWeatherData(daily_data):
     for i, day in enumerate(daily_data):
         daily_data[i] = DailyWeatherDataElem(dt=day["dt"],
-                                                 average_temp=int(day["temp"]["day"]),
-                                                 max_temp=day["temp"]["max"],
-                                                 min_temp=day["temp"]["min"],
-                                                 icon=day["weather"])
+                                             average_temp=int(day["temp"]["day"]),
+                                             max_temp=int(day["temp"]["max"]),
+                                             min_temp=int(day["temp"]["min"]),
+                                             icon=day["weather"][0]["icon"])
 
 
 def getWeatherData(lat: float, lon: float) -> FullWeatherData:
@@ -57,15 +40,14 @@ def getWeatherData(lat: float, lon: float) -> FullWeatherData:
         return weather_data
 
     except requests.ConnectionError:
-        createInternetWarningWindow()
+        #createInternetWarningWindow()
         return getWeatherData(lat, lon)
 
 
-def getCurrentLocation():
+def _getCurrentLocation():
     location = geocoder.ip('me')
 
     if location.city is None:
-        createInternetWarningWindow()
-        return getCurrentLocation()
+        raise IpReceivingError
 
     return location

@@ -6,11 +6,12 @@ from json import loads, dump
 from setupUi import setupQCompleter
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import QTimer, QTime
-from WeatherFrame import WeatherFrame
-from weatherTools import getCurrentLocation, getWeatherData
-from filesTools import loadUserData, readCityDict
 from WeatherStructs import FullWeatherData
 from WeatherPage import WeatherPage
+from WeatherFrame import WeatherFrame
+from weatherTools import _getCurrentLocation, getWeatherData
+from filesTools import loadUserData, readCityDict
+from exceptions import IpReceivingError
 
 
 class WeatherWindow:
@@ -76,7 +77,10 @@ class WeatherWindow:
         self.scroll_area_vlayout.setSpacing(0)
 
         self.local_timezone_offset = -time.timezone
-        self.current_city_geo = getCurrentLocation()
+
+        self.current_city_geo = None
+        self.getCurrentLocation()
+
         self.current_city_data = getWeatherData(*self.current_city_geo.latlng)
 
         self.main_widget = QtWidgets.QWidget(self.central_widget)
@@ -184,6 +188,12 @@ class WeatherWindow:
         self.completer.activated.connect(
             lambda: self.createPageFromSearch(
                 self.city_pages_list[self.stacked_widget.currentIndex()].weather_line_edit.text()))
+
+    def getCurrentLocation(self):
+        try:
+            self.current_city_geo = _getCurrentLocation()
+        except IpReceivingError:
+            self.createInternetWarningWindow()
 
     def sliderAnimation(self):
         if self.is_expanded:
@@ -326,3 +336,21 @@ class WeatherWindow:
         current_time = QTime.currentTime()
         for frame in self.city_frames_list:
             frame.setTime(current_time)
+
+    def createInternetWarningWindow(self):
+        def btnsWork(btn):
+            if btn.text() == "Retry":
+                self.getCurrentLocation()
+            else:
+                exit(1)
+
+        error = QtWidgets.QMessageBox()
+        error.setWindowTitle("Нет подключения к интернету")
+        error.setText("Проверьте подключение к интернету и нажмите Retry\nЕсли хотите закрыть приложение, нажмите Ok")
+        error.setIcon(QtWidgets.QMessageBox.Warning)
+        error.setStandardButtons(QtWidgets.QMessageBox.Retry | QtWidgets.QMessageBox.Ok)
+        error.setDefaultButton(QtWidgets.QMessageBox.Retry)
+        error.buttonClicked.connect(btnsWork)
+        error.exec()
+
+

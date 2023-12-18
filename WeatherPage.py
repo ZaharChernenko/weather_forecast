@@ -282,9 +282,6 @@ class WeatherPage(QWidget):
         super().deleteLater()
         self.timer.deleteLater()  # python does not delete timer automatically and will try to call refreshData
 
-    """def __del__(self):
-        print(self._city_name + " deleted")"""
-
     def createHourlyAndDailyWidgets(self, hourly, daily):
         self.list_of_hourly_elements = []
         for hour in hourly:
@@ -405,10 +402,7 @@ class HourlyElement(QFrame):
 
 
 class DailyElement(QFrame):
-    def __init__(self, parent,
-                 day_data: DailyWeatherDataElem,
-                 current_city_time_offset: int,
-                 local_time_offset: int):
+    def __init__(self, parent, day_data: DailyWeatherDataElem, current_city_time_offset: int, local_time_offset: int):
         super().__init__(parent)
 
         days_translator = gettext.translation('days_translate', './locale', languages=['ru'])
